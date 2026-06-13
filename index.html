@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocoÚnico</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <section id="pantalla-volcado" class="pantalla">
+      <div class="card">
+        <h1>FocoÚnico</h1>
+        <p class="texto-intro">Escribe tu gran tarea y el sub-paso que vas a completar ahora.</p>
+        <label for="tarea">Gran tarea</label>
+        <input id="tarea" type="text" placeholder="Ej. Estudiar para el parcial" />
+        <label for="subpaso">Sub-paso</label>
+        <input id="subpaso" type="text" placeholder="Ej. Leer el capítulo 3" />
+        <button id="boton-iniciar" type="button">Iniciar Foco</button>
+      </div>
+    </section>
+
+    <section id="pantalla-foco" class="pantalla oculto">
+      <div class="card foco-card">
+        <div class="etiqueta">Sub-paso activo</div>
+        <h2 id="texto-gran-tarea"></h2>
+        <p id="texto-subpaso" class="subpaso"></p>
+        <div id="contenedor-tiempo" class="cronometro">20:00</div>
+        <p id="mensaje-foco" class="mensaje">Mantente concentrado hasta que termine el tiempo.</p>
+        <button id="boton-siguiente" class="oculto" type="button">Siguiente tarea</button>
+      </div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

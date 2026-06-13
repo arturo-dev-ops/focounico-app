@@ -1,0 +1,154 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+  font-family: Inter, system-ui, sans-serif;
+  background: #f1eee9;
+  color: #2b2b2b;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ede8e3 0%, #ded5cb 100%);
+}
+
+main {
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+}
+
+.pantalla {
+  width: 100%;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(43, 43, 43, 0.08);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 26px 60px rgba(31, 30, 27, 0.08);
+}
+
+h1, h2 {
+  margin: 0 0 18px;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.7rem;
+}
+
+.texto-intro,
+label,
+.mensaje,
+.subpaso {
+  margin: 0 0 14px;
+  line-height: 1.55;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  min-height: 46px;
+  margin-bottom: 18px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(43, 43, 43, 0.16);
+  background: #faf6f1;
+  font-size: 1rem;
+}
+
+button {
+  width: 100%;
+  min-height: 48px;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  background: #5f6f83;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  background: #4a5b6c;
+}
+
+button:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+}
+
+.oculto {
+  display: none;
+}
+
+.foco-card {
+  display: grid;
+  gap: 20px;
+  text-align: center;
+}
+
+.etiqueta {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(94, 126, 157, 0.14);
+  color: #3f536b;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.cronometro {
+  width: 100%;
+  min-height: 164px;
+  display: grid;
+  place-items: center;
+  border-radius: 28px;
+  background: #eef5f3;
+  color: #1f3a30;
+  font-size: 4rem;
+  font-weight: 800;
+}
+
+body.descanso {
+  background: linear-gradient(180deg, #f2f7f0 0%, #dce7d9 100%);
+}
+
+body.descanso .card {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+body.descanso .cronometro {
+  background: #dae9de;
+}
+
+@media (max-width: 520px) {
+  body {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 22px;
+  }
+}
