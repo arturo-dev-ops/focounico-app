@@ -1,0 +1,21 @@
+{
+  "name": "FocoÚnico",
+  "short_name": "FocoÚnico",
+  "description": "Temporizador minimalista para sesiones de foco de 20 minutos y descansos de 5 minutos.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1eee9",
+  "theme_color": "#5f6f83",
+  "icons": [
+    {
+      "src": "FocoUnico.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "FocoUnico.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
