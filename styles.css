@@ -40,6 +40,14 @@ main {
   box-shadow: 0 26px 60px rgba(31, 30, 27, 0.08);
 }
 
+.logo {
+  display: block;
+  margin: 0 auto 14px;
+  width: 72px;
+  height: auto;
+  border-radius: 12px;
+}
+
 h1, h2 {
   margin: 0 0 18px;
 }
