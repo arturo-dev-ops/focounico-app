@@ -29,6 +29,7 @@ let enDescanso = false;
 let estaPausado = false;
 let temaOscuro = false;
 let historial = [];
+let audioContext;
 
 function formatearTiempo(segundos) {
   const minutos = String(Math.floor(segundos / 60)).padStart(2, '0');
@@ -89,6 +90,32 @@ function actualizarProgreso() {
   const totalSegundos = enDescanso ? descansoMinutos * 60 : focoMinutos * 60;
   const avance = totalSegundos > 0 ? Math.round(((totalSegundos - tiempoRestante) / totalSegundos) * 100) : 0;
   barraAvance.style.width = `${Math.min(Math.max(avance, 0), 100)}%`;
+}
+
+function reproducirSonido(tipo) {
+  try {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    const duracion = 0.2;
+    const frecuencia = tipo === 'foco' ? 880 : 660;
+    const ganancia = audioContext.createGain();
+    const oscilador = audioContext.createOscillator();
+
+    oscilador.type = 'sine';
+    oscilador.frequency.value = frecuencia;
+    oscilador.connect(ganancia);
+    ganancia.connect(audioContext.destination);
+    ganancia.gain.setValueAtTime(0.001, audioContext.currentTime);
+    ganancia.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
+    ganancia.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duracion);
+
+    oscilador.start(audioContext.currentTime);
+    oscilador.stop(audioContext.currentTime + duracion);
+  } catch (error) {
+    console.warn('No se puede reproducir sonido:', error);
+  }
 }
 
 function establecerTema(oscuro) {
@@ -257,8 +284,10 @@ function iniciarTemporizador() {
     if (tiempoRestante <= 0) {
       clearInterval(intervalo);
       if (!enDescanso) {
+        reproducirSonido('foco');
         comenzarDescanso();
       } else {
+        reproducirSonido('descanso');
         finalizarDescanso();
         registrarSesion(true);
       }
