@@ -2,6 +2,10 @@ const pantallaVolcado = document.getElementById('pantalla-volcado');
 const pantallaFoco = document.getElementById('pantalla-foco');
 const botonIniciar = document.getElementById('boton-iniciar');
 const botonSiguiente = document.getElementById('boton-siguiente');
+const botonHistorial = document.getElementById('boton-historial');
+const botonVolver = document.getElementById('boton-volver');
+const pantallaHistorial = document.getElementById('pantalla-historial');
+const listaHistorial = document.getElementById('lista-historial');
 const inputTarea = document.getElementById('tarea');
 const inputSubpaso = document.getElementById('subpaso');
 const inputFocoMinutos = document.getElementById('foco-minutos');
@@ -16,6 +20,7 @@ let tiempoRestante = 20 * 60;
 let focoMinutos = 20;
 let descansoMinutos = 5;
 let enDescanso = false;
+let historial = [];
 
 function formatearTiempo(segundos) {
   const minutos = String(Math.floor(segundos / 60)).padStart(2, '0');
@@ -48,8 +53,59 @@ function guardarConfiguracion() {
   localStorage.setItem('descansoMinutos', descansoMinutos);
 }
 
+function obtenerHistorial() {
+  const contenido = localStorage.getItem('historialSesiones');
+  try {
+    historial = contenido ? JSON.parse(contenido) : [];
+  } catch (error) {
+    historial = [];
+  }
+}
+
+function guardarHistorial() {
+  localStorage.setItem('historialSesiones', JSON.stringify(historial));
+}
+
+function agregarHistorial(tarea, subpaso, foco, descanso, completado) {
+  const registro = {
+    fecha: new Date().toISOString(),
+    tarea,
+    subpaso,
+    foco,
+    descanso,
+    completado,
+  };
+
+  historial.unshift(registro);
+  if (historial.length > 10) {
+    historial.pop();
+  }
+  guardarHistorial();
+}
+
+function mostrarPantallaHistorial() {
+  pantallaVolcado.classList.add('oculto');
+  pantallaFoco.classList.add('oculto');
+  pantallaHistorial.classList.remove('oculto');
+  dibujarHistorial();
+}
+
+function mostrarPantallaVolcado() {
+  pantallaFoco.classList.add('oculto');
+  pantallaHistorial.classList.add('oculto');
+  pantallaVolcado.classList.remove('oculto');
+  botonSiguiente.classList.add('oculto');
+  mensajeFoco.textContent = 'Mantente concentrado hasta que termine el tiempo.';
+  document.body.classList.remove('descanso');
+  tiempoRestante = focoMinutos * 60;
+  contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
+  enDescanso = false;
+  clearInterval(intervalo);
+}
+
 function mostrarPantallaFoco() {
   pantallaVolcado.classList.add('oculto');
+  pantallaHistorial.classList.add('oculto');
   pantallaFoco.classList.remove('oculto');
 }
 
@@ -78,6 +134,7 @@ function iniciarTemporizador() {
         comenzarDescanso();
       } else {
         finalizarDescanso();
+        registrarSesion(true);
       }
     }
   }, 1000);
@@ -95,6 +152,12 @@ function comenzarDescanso() {
 function finalizarDescanso() {
   mensajeFoco.textContent = 'Descanso terminado. Pulsa el botón para volver a la pantalla de volcado.';
   botonSiguiente.classList.remove('oculto');
+}
+
+function registrarSesion(completado) {
+  const tareaValor = textoGranTarea.textContent;
+  const subpasoValor = textoSubpaso.textContent;
+  agregarHistorial(tareaValor, subpasoValor, focoMinutos, descansoMinutos, completado);
 }
 
 botonIniciar.addEventListener('click', () => {
@@ -115,5 +178,11 @@ botonIniciar.addEventListener('click', () => {
 });
 
 botonSiguiente.addEventListener('click', mostrarPantallaVolcado);
+botonHistorial.addEventListener('click', mostrarPantallaHistorial);
+botonVolver.addEventListener('click', () => {
+  pantallaHistorial.classList.add('oculto');
+  pantallaVolcado.classList.remove('oculto');
+});
 
 obtenerConfiguracion();
+obtenerHistorial();

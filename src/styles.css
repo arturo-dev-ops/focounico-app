@@ -117,9 +117,40 @@ button:hover {
   background: #4a5b6c;
 }
 
+button.secondary {
+  background: #8d99ae;
+}
+
+button.secondary:hover {
+  background: #6b788b;
+}
+
 button:disabled {
   opacity: 0.56;
   cursor: not-allowed;
+}
+
+.historial-card {
+  display: grid;
+  gap: 18px;
+}
+
+.historial-list {
+  display: grid;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.historial-item {
+  background: #f5f4f1;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.historial-item strong {
+  display: block;
+  margin-bottom: 8px;
 }
 
 .oculto {

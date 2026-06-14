@@ -43,6 +43,7 @@
           </div>
         </div>
         <button id="boton-iniciar" type="button">Iniciar Foco</button>
+        <button id="boton-historial" type="button" class="secondary">Ver historial</button>
       </div>
     </section>
 
@@ -54,6 +55,14 @@
         <div id="contenedor-tiempo" class="cronometro">20:00</div>
         <p id="mensaje-foco" class="mensaje">Mantente concentrado hasta que termine el tiempo.</p>
         <button id="boton-siguiente" class="oculto" type="button">Siguiente tarea</button>
+      </div>
+    </section>
+
+    <section id="pantalla-historial" class="pantalla oculto">
+      <div class="card historial-card">
+        <div class="etiqueta">Historial de sesiones</div>
+        <div id="lista-historial" class="historial-list"></div>
+        <button id="boton-volver" type="button">Volver</button>
       </div>
     </section>
   </main>
