@@ -4,15 +4,15 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 
 ## 🚀 Qué hace ahora
 
-- Pantalla inicial para escribir una gran tarea y el sub-paso que vas a completar.
-- Permite elegir presets de tiempo: `20/5`, `25/5` y `45/15`.
-- Permite ajustar minutos de foco y descanso manualmente.
-- Temporizador de foco con barra de progreso visual.
-- Descanso automático al terminar el foco.
-- Botón de pausa / reanudar para detener y volver a iniciar el temporizador.
-- Modo oscuro que se guarda en `localStorage`.
-- Historial de sesiones almacenado en `localStorage` con estadísticas básicas.
-- Validación en pantalla para entradas incompletas.
+- [x] Pantalla inicial para escribir una gran tarea y el sub-paso que vas a completar.
+- [x] Permite elegir presets de tiempo: `20/5`, `25/5` y `45/15`.
+- [x] Permite ajustar minutos de foco y descanso manualmente.
+- [x] Temporizador de foco con barra de progreso visual.
+- [x] Descanso automático al terminar el foco.
+- [x] Botón de pausa / reanudar para detener y volver a iniciar el temporizador.
+- [x] Modo oscuro que se guarda en `localStorage`.
+- [x] Historial de sesiones almacenado en `localStorage` con estadísticas básicas.
+- [x] Validación en pantalla para entradas incompletas.
 
 ## 📁 Estructura del proyecto
 
@@ -53,3 +53,14 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 ## 📌 Nota
 
 Este proyecto es una versión progresiva del MVP inicial. Ya incorpora ajustes de tiempo, historial y mejoras de experiencia, y puede seguir evolucionando con más funciones de productividad.
+
+## 🌐 Despliegue en GitHub Pages
+
+La aplicación está lista para publicarse como sitio estático. Para desplegar en GitHub Pages:
+
+1. Asegúrate de tener el repo en GitHub bajo `https://github.com/arturo-dev-ops/focounico-app`.
+2. Añade o actualiza la rama `gh-pages` con el contenido del sitio.
+3. Activa GitHub Pages en los ajustes del repositorio y selecciona la rama `gh-pages` como fuente.
+4. El sitio debería estar disponible en `https://arturo-dev-ops.github.io/focounico-app/`.
+
+Este repositorio incluye un archivo `.nojekyll` para evitar que GitHub procese el sitio con Jekyll.

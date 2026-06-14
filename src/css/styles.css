@@ -139,6 +139,25 @@ button.small {
   margin-bottom: 18px;
 }
 
+.template-group {
+  margin-bottom: 14px;
+}
+
+.template-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.template-controls select {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(43,43,43,0.12);
+  background: #faf6f1;
+}
+
 .preset {
   flex: 1 1 30%;
   min-width: 80px;
@@ -268,6 +287,87 @@ body.descanso .card {
 
 body.descanso .cronometro {
   background: #dae9de;
+}
+
+/* Modo oscuro */
+body.dark-mode {
+  color-scheme: dark;
+  background: linear-gradient(180deg, #0f1418 0%, #081011 100%);
+  color: #e6eef6;
+}
+
+body.dark-mode .card {
+  background: rgba(18, 20, 23, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  color: #e6eef6;
+}
+
+body.dark-mode input {
+  background: #0f1315;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: #e6eef6;
+}
+
+body.dark-mode button {
+  background: #2b6b88;
+  color: #fff;
+}
+
+body.dark-mode button.secondary {
+  background: #3b4a54;
+}
+
+body.dark-mode .preset {
+  background: #0e2026;
+  color: #dbeef0;
+}
+
+body.dark-mode .preset.active {
+  background: #58b593;
+  color: #fff;
+}
+
+body.dark-mode .cronometro {
+  background: #071014;
+  color: #9fe2c6;
+}
+
+body.dark-mode .historial-stats {
+  background: #071018;
+  color: #d7eef0;
+}
+
+body.dark-mode .historial-item {
+  background: #0b1113;
+}
+
+body.dark-mode .error-message {
+  color: #ff8088;
+}
+
+/* Transiciones suaves para cambio de tema */
+body, .card, input, button, .preset, .cronometro, .historial-stats {
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+#barra-avance {
+  transition: width 0.2s ease, background 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body, .card, input, button, .preset, .cronometro, .historial-stats, #barra-avance {
+    transition: none !important;
+  }
+}
+
+/* Utilidad para lectores de pantalla */
+.sr-only {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
 }
 
 @media (max-width: 520px) {

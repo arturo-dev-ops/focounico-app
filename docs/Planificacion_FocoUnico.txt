@@ -30,34 +30,34 @@ Para mantener el proyecto limpio y fácil de abordar, utilizaremos:
 3. MAPA DE TAREAS - TROCEADO EN PASOS MINÚSCULOS (Para abordar de uno en uno)
 -------------------------------------------------------------------------------
 
-[ ] PASO 1: Cimientos del proyecto y Maquetación Base (HTML)
+[x] PASO 1: Cimientos del proyecto y Maquetación Base (HTML)
     * Crear la carpeta del proyecto y los 3 archivos vacíos (index, css, js).
     * Vincular el CSS y el JS en el HTML.
     * Estructurar el HTML con dos contenedores principales (`<div id="pantalla-volcado">` y `<div id="pantalla-foco">`).
     * En la pantalla de volcado: Crear el formulario con los inputs para la "Gran Tarea", el "Sub-paso" y el botón "Iniciar Foco".
     * En la pantalla de foco: Crear los elementos de texto para los títulos y el contenedor grande para el cronómetro `00:00`.
 
-[ ] PASO 2: Estilo Visual Relajante (CSS)
+[x] PASO 2: Estilo Visual Relajante (CSS)
     * Aplicar un color de fondo pastel o neutro que transmita calma (evitar blancos puros o colores chillones).
     * Centrar el contenido vertical y horizontalmente en la pantalla de forma limpia.
     * Crear una clase CSS `.oculto { display: none; }` para controlar qué pantalla se muestra.
     * Ocultar la pantalla de foco por defecto para empezar a trabajar solo con el diseño del formulario.
 
-[ ] PASO 3: Lógica de Intercambio de Pantallas (JavaScript)
+[x] PASO 3: Lógica de Intercambio de Pantallas (JavaScript)
     * Capturar los elementos del DOM en `app.js` (inputs, botones, divs de pantalla).
     * Añadir un evento `addEventListener` al botón "Iniciar Foco".
     * Al hacer clic, validar que los campos no estén vacíos.
     * Guardar los textos en variables y aplicar la clase `.oculto` a la pantalla de volcado, eliminándola de la pantalla de foco.
     * Pintar en la pantalla de foco los textos que el usuario escribió.
 
-[ ] PASO 4: El Motor del Temporizador (JavaScript)
+[x] PASO 4: El Motor del Temporizador (JavaScript)
     * Crear una variable para el tiempo de foco (ej: 20 minutos = 1200 segundos).
     * Crear una función que reste 1 segundo cada vez (usando `setInterval`).
     * Crear una función auxiliar para formatear los segundos en formato bonito `MM:SS` (ej: 1195 segundos -> `19:55`).
     * Pintar el tiempo actualizado en el HTML cada segundo.
     * Detener el `setInterval` cuando el tiempo llegue a `00:00`.
 
-[ ] PASO 5: Bloqueo de Descanso Obligatorio (JavaScript/CSS)
+[x] PASO 5: Bloqueo de Descanso Obligatorio (JavaScript/CSS)
     * Cuando el tiempo llegue a `00:00`, cambiar el estado de la app a "Descanso".
     * Modificar el texto en pantalla por un mensaje de descanso: "¡Para! Levántate, estira las piernas y bebe agua."
     * Modificar el fondo de la pantalla (usar un tono suave/verde que indique pausa).

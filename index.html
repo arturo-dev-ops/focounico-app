@@ -22,17 +22,28 @@
   <meta name="twitter:image" content="https://raw.githubusercontent.com/arturo-dev-ops/focounico-app/main/assets/images/FocoUnico.png" />
 </head>
 <body>
-  <main>
-    <section id="pantalla-volcado" class="pantalla">
+  <main role="main">
+    <section id="pantalla-volcado" class="pantalla" aria-hidden="false">
       <div class="card">
         <img src="assets/images/FocoUnico.png" alt="FocoÚnico logo" class="logo" />
         <button id="boton-tema" type="button" class="secondary small">Tema oscuro</button>
+        <button id="boton-estricto" type="button" class="secondary small" aria-pressed="false">Modo estricto</button>
         <h1>FocoÚnico</h1>
         <p class="texto-intro">Escribe tu gran tarea y el sub-paso que vas a completar ahora.</p>
         <label for="tarea">Gran tarea</label>
         <input id="tarea" type="text" placeholder="Ej. Estudiar para el parcial" />
         <label for="subpaso">Sub-paso</label>
         <input id="subpaso" type="text" placeholder="Ej. Leer el capítulo 3" />
+        <div class="template-group">
+          <label for="plantillas">Tareas frecuentes</label>
+          <div class="template-controls">
+            <select id="plantillas" aria-label="Plantillas de tareas">
+              <option value="">— Seleccionar plantilla —</option>
+            </select>
+            <button id="boton-guardar-plantilla" type="button" class="secondary small">Guardar plantilla</button>
+            <button id="boton-eliminar-plantilla" type="button" class="secondary small">Eliminar</button>
+          </div>
+        </div>
         <div class="config-group">
           <div class="config-field">
             <label for="foco-minutos">Minutos de foco</label>
@@ -54,7 +65,7 @@
       </div>
     </section>
 
-    <section id="pantalla-foco" class="pantalla oculto">
+    <section id="pantalla-foco" class="pantalla oculto" aria-hidden="true">
       <div class="card foco-card">
         <div class="etiqueta">Sub-paso activo</div>
         <h2 id="texto-gran-tarea"></h2>
@@ -67,7 +78,7 @@
       </div>
     </section>
 
-    <section id="pantalla-historial" class="pantalla oculto">
+    <section id="pantalla-historial" class="pantalla oculto" aria-hidden="true">
       <div class="card historial-card">
         <div class="etiqueta">Historial de sesiones</div>
         <div id="estadisticas-historial" class="historial-stats"></div>

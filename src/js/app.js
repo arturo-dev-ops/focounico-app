@@ -12,6 +12,10 @@ const inputFocoMinutos = document.getElementById('foco-minutos');
 const inputDescansoMinutos = document.getElementById('descanso-minutos');
 const presetButtons = document.querySelectorAll('.preset');
 const botonTema = document.getElementById('boton-tema');
+const botonEstricto = document.getElementById('boton-estricto');
+const selectPlantillas = document.getElementById('plantillas');
+const botonGuardarPlantilla = document.getElementById('boton-guardar-plantilla');
+const botonEliminarPlantilla = document.getElementById('boton-eliminar-plantilla');
 const mensajeError = document.getElementById('mensaje-error');
 const botonPausa = document.getElementById('boton-pausa');
 const barraAvance = document.getElementById('barra-avance');
@@ -30,6 +34,7 @@ let estaPausado = false;
 let temaOscuro = false;
 let historial = [];
 let audioContext;
+let modoEstricto = false;
 
 function formatearTiempo(segundos) {
   const minutos = String(Math.floor(segundos / 60)).padStart(2, '0');
@@ -159,6 +164,52 @@ function establecerTema(oscuro) {
   document.body.classList.toggle('dark-mode', oscuro);
   botonTema.textContent = oscuro ? 'Tema claro' : 'Tema oscuro';
   localStorage.setItem('temaOscuro', oscuro ? '1' : '0');
+
+  // Actualizar meta theme-color para móviles y barra de título
+  let metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (!metaTheme) {
+    metaTheme = document.createElement('meta');
+    metaTheme.setAttribute('name', 'theme-color');
+    document.head.appendChild(metaTheme);
+  }
+  metaTheme.setAttribute('content', oscuro ? '#081011' : '#5f6f83');
+
+  // Suavizar la transición de colores
+  try {
+    document.body.style.transition = 'background 0.25s ease, color 0.25s ease';
+  } catch (e) {
+    // noop
+  }
+  // Actualizar estado ARIA del botón de tema
+  try { botonTema.setAttribute('aria-pressed', oscuro ? 'true' : 'false'); } catch (e) {}
+
+  console.log(`Tema establecido: ${oscuro ? 'oscuro' : 'claro'}`);
+}
+
+function establecerModoEstricto(valor) {
+  modoEstricto = Boolean(valor);
+  try { botonEstricto.setAttribute('aria-pressed', modoEstricto ? 'true' : 'false'); } catch (e) {}
+  botonEstricto.textContent = modoEstricto ? 'Estricto: ON' : 'Modo estricto';
+  localStorage.setItem('modoEstricto', modoEstricto ? '1' : '0');
+}
+
+function aplicarModoEstricto(activar) {
+  // Cuando está activa una sesión de foco y modoEstricto es true, bloqueamos navegación y edición
+  const disabled = Boolean(activar && modoEstricto);
+  try {
+    inputTarea.disabled = disabled;
+    inputSubpaso.disabled = disabled;
+    inputFocoMinutos.disabled = disabled;
+    inputDescansoMinutos.disabled = disabled;
+    presetButtons.forEach(b => b.disabled = disabled);
+    if (selectPlantillas) selectPlantillas.disabled = disabled;
+    if (botonGuardarPlantilla) botonGuardarPlantilla.disabled = disabled;
+    if (botonEliminarPlantilla) botonEliminarPlantilla.disabled = disabled;
+    botonHistorial.disabled = disabled;
+    botonVolver.disabled = disabled;
+    // Permitimos pausar incluso en modo estricto
+    botonPausa.disabled = false;
+  } catch (e) {}
 }
 
 function cargarTema() {
@@ -232,6 +283,62 @@ function guardarHistorial() {
   localStorage.setItem('historialSesiones', JSON.stringify(historial));
 }
 
+// Plantillas (tareas frecuentes)
+function cargarPlantillas() {
+  const raw = localStorage.getItem('plantillasTareas');
+  let plantillas = [];
+  try { plantillas = raw ? JSON.parse(raw) : []; } catch (e) { plantillas = []; }
+  // limpiar select
+  if (selectPlantillas) {
+    selectPlantillas.innerHTML = '<option value="">— Seleccionar plantilla —</option>';
+    plantillas.forEach((p, i) => {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = p.name;
+      selectPlantillas.appendChild(opt);
+    });
+  }
+}
+
+function guardarPlantilla() {
+  const tareaValor = inputTarea.value.trim();
+  const subpasoValor = inputSubpaso.value.trim();
+  if (!tareaValor && !subpasoValor) {
+    mostrarError('Rellena la tarea o sub-paso antes de guardar una plantilla.');
+    return;
+  }
+  const nombre = prompt('Nombre para la plantilla:', tareaValor || subpasoValor);
+  if (!nombre) return;
+  const raw = localStorage.getItem('plantillasTareas');
+  let plantillas = [];
+  try { plantillas = raw ? JSON.parse(raw) : []; } catch (e) { plantillas = []; }
+  plantillas.push({ name: nombre, tarea: tareaValor, subpaso: subpasoValor });
+  localStorage.setItem('plantillasTareas', JSON.stringify(plantillas));
+  cargarPlantillas();
+}
+
+function eliminarPlantilla() {
+  if (!selectPlantillas) return;
+  const idx = selectPlantillas.value;
+  if (!idx) { mostrarError('Selecciona primero una plantilla para eliminar.'); return; }
+  const raw = localStorage.getItem('plantillasTareas');
+  let plantillas = [];
+  try { plantillas = raw ? JSON.parse(raw) : []; } catch (e) { plantillas = []; }
+  plantillas.splice(Number(idx), 1);
+  localStorage.setItem('plantillasTareas', JSON.stringify(plantillas));
+  cargarPlantillas();
+}
+
+function aplicarPlantillaPorIndice(idx) {
+  const raw = localStorage.getItem('plantillasTareas');
+  let plantillas = [];
+  try { plantillas = raw ? JSON.parse(raw) : []; } catch (e) { plantillas = []; }
+  const p = plantillas[Number(idx)];
+  if (!p) return;
+  inputTarea.value = p.tarea || '';
+  inputSubpaso.value = p.subpaso || '';
+}
+
 function agregarHistorial(tarea, subpaso, foco, descanso, completado) {
   const registro = {
     fecha: new Date().toISOString(),
@@ -249,17 +356,44 @@ function agregarHistorial(tarea, subpaso, foco, descanso, completado) {
   guardarHistorial();
 }
 
+function setAriaAndInert(elemento, hidden) {
+  elemento.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+  if ('inert' in elemento) elemento.inert = hidden;
+}
+
+function mostrarPantallaSegura(pantallaActiva, focusTarget) {
+  const todasPantallas = [pantallaVolcado, pantallaFoco, pantallaHistorial];
+  pantallaActiva.classList.remove('oculto');
+  setAriaAndInert(pantallaActiva, false);
+  if (focusTarget) {
+    setTimeout(() => {
+      focusTarget.focus();
+      todasPantallas.forEach((p) => {
+        if (p !== pantallaActiva) {
+          p.classList.add('oculto');
+          setAriaAndInert(p, true);
+        }
+      });
+    }, 0);
+  } else {
+    todasPantallas.forEach((p) => {
+      if (p !== pantallaActiva) {
+        p.classList.add('oculto');
+        setAriaAndInert(p, true);
+      }
+    });
+  }
+}
+
 function mostrarPantallaHistorial() {
-  pantallaVolcado.classList.add('oculto');
-  pantallaFoco.classList.add('oculto');
-  pantallaHistorial.classList.remove('oculto');
+  setAriaAndInert(pantallaHistorial, false);
+  mostrarPantallaSegura(pantallaHistorial, botonVolver);
   dibujarHistorial();
 }
 
 function mostrarPantallaVolcado() {
-  pantallaFoco.classList.add('oculto');
-  pantallaHistorial.classList.add('oculto');
-  pantallaVolcado.classList.remove('oculto');
+  setAriaAndInert(pantallaVolcado, false);
+  mostrarPantallaSegura(pantallaVolcado, inputTarea);
   botonSiguiente.classList.add('oculto');
   botonPausa.classList.add('oculto');
   estaPausado = false;
@@ -272,11 +406,17 @@ function mostrarPantallaVolcado() {
 }
 
 function mostrarPantallaFoco() {
-  pantallaVolcado.classList.add('oculto');
-  pantallaHistorial.classList.add('oculto');
+  setAriaAndInert(pantallaFoco, false);
   pantallaFoco.classList.remove('oculto');
   botonPausa.classList.remove('oculto');
   botonPausa.textContent = estaPausado ? 'Reanudar' : 'Pausa';
+  setTimeout(() => {
+    botonPausa.focus();
+    pantallaVolcado.classList.add('oculto');
+    pantallaHistorial.classList.add('oculto');
+    setAriaAndInert(pantallaVolcado, true);
+    setAriaAndInert(pantallaHistorial, true);
+  }, 0);
   actualizarProgreso();
 }
 
@@ -312,6 +452,9 @@ function iniciarTemporizador() {
   contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
   actualizarProgreso();
 
+  // Si el modo estricto está activado, aplicarlo durante la sesión
+  aplicarModoEstricto(true);
+
   intervalo = setInterval(() => {
     tiempoRestante -= 1;
     contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
@@ -330,6 +473,8 @@ function iniciarTemporizador() {
         mostrarNotificacion('descanso');
         finalizarDescanso();
         registrarSesion(true);
+          // al finalizar el descanso, retiramos el modo estricto temporal
+          aplicarModoEstricto(false);
       }
     }
   }, 1000);
@@ -361,7 +506,9 @@ botonIniciar.addEventListener('click', () => {
   const subpasoValor = inputSubpaso.value.trim();
 
   if (!tareaValor || !subpasoValor) {
-    alert('Por favor completa la gran tarea y el sub-paso antes de iniciar.');
+    mostrarError('Por favor completa la gran tarea y el sub-paso antes de iniciar.');
+    if (!tareaValor) inputTarea.focus();
+    else inputSubpaso.focus();
     return;
   }
 
@@ -376,9 +523,10 @@ botonIniciar.addEventListener('click', () => {
 
 botonSiguiente.addEventListener('click', mostrarPantallaVolcado);
 botonHistorial.addEventListener('click', mostrarPantallaHistorial);
-buttonTema.addEventListener('click', () => {
+botonTema.addEventListener('click', () => {
   establecerTema(!temaOscuro);
 });
+if (botonEstricto) botonEstricto.addEventListener('click', () => establecerModoEstricto(!modoEstricto));
 botonPausa.addEventListener('click', alternarPausa);
 presetButtons.forEach((button) => {
   button.addEventListener('click', () => {
@@ -386,6 +534,18 @@ presetButtons.forEach((button) => {
     const descanso = parseInt(button.dataset.descanso, 10);
     seleccionarPreset(foco, descanso);
   });
+});
+
+if (botonGuardarPlantilla) botonGuardarPlantilla.addEventListener('click', guardarPlantilla);
+if (botonEliminarPlantilla) botonEliminarPlantilla.addEventListener('click', eliminarPlantilla);
+if (selectPlantillas) selectPlantillas.addEventListener('change', (e) => {
+  if (!e.target.value) return;
+  aplicarPlantillaPorIndice(e.target.value);
+});
+
+// Ocultar el mensaje de error cuando el usuario escribe
+[inputTarea, inputSubpaso, inputFocoMinutos, inputDescansoMinutos].forEach((el) => {
+  if (el) el.addEventListener('input', ocultarError);
 });
 
 document.addEventListener('keydown', (event) => {
@@ -398,6 +558,20 @@ document.addEventListener('keydown', (event) => {
     alternarPausa();
   }
 });
+
+// Inicialización
+obtenerConfiguracion();
+obtenerHistorial();
+cargarTema();
+dibujarEstadisticas();
+
+// Sincronizar ARIA al iniciar
+try {
+  botonTema.setAttribute('aria-pressed', temaOscuro ? 'true' : 'false');
+  pantallaVolcado.setAttribute('aria-hidden', pantallaVolcado.classList.contains('oculto') ? 'true' : 'false');
+  pantallaFoco.setAttribute('aria-hidden', pantallaFoco.classList.contains('oculto') ? 'true' : 'false');
+  pantallaHistorial.setAttribute('aria-hidden', pantallaHistorial.classList.contains('oculto') ? 'true' : 'false');
+} catch (e) {}
 
 botonVolver.addEventListener('click', () => {
   pantallaHistorial.classList.add('oculto');
