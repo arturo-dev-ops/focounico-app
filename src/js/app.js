@@ -130,7 +130,7 @@ function solicitarPermisoNotificacion() {
 
   Notification.requestPermission().then((perm) => {
     if (perm === 'granted') {
-      console.log('Notificaciones habilitadas');
+      // Notificaciones habilitadas
     }
   });
 }
@@ -182,8 +182,6 @@ function establecerTema(oscuro) {
   }
   // Actualizar estado ARIA del botón de tema
   try { botonTema.setAttribute('aria-pressed', oscuro ? 'true' : 'false'); } catch (e) {}
-
-  console.log(`Tema establecido: ${oscuro ? 'oscuro' : 'claro'}`);
 }
 
 function establecerModoEstricto(valor) {
@@ -215,6 +213,11 @@ function aplicarModoEstricto(activar) {
 function cargarTema() {
   const valorTema = localStorage.getItem('temaOscuro');
   establecerTema(valorTema === '1');
+}
+
+function cargarModoEstricto() {
+  const valorEstricto = localStorage.getItem('modoEstricto');
+  establecerModoEstricto(valorEstricto === '1');
 }
 
 function dibujarEstadisticas() {
@@ -297,6 +300,10 @@ function cargarPlantillas() {
       opt.textContent = p.name;
       selectPlantillas.appendChild(opt);
     });
+    selectPlantillas.value = '';
+    if (botonEliminarPlantilla) {
+      botonEliminarPlantilla.disabled = plantillas.length === 0;
+    }
   }
 }
 
@@ -386,7 +393,6 @@ function mostrarPantallaSegura(pantallaActiva, focusTarget) {
 }
 
 function mostrarPantallaHistorial() {
-  setAriaAndInert(pantallaHistorial, false);
   mostrarPantallaSegura(pantallaHistorial, botonVolver);
   dibujarHistorial();
 }
@@ -397,6 +403,8 @@ function mostrarPantallaVolcado() {
   botonSiguiente.classList.add('oculto');
   botonPausa.classList.add('oculto');
   estaPausado = false;
+  aplicarModoEstricto(false);
+  enDescanso = false;
   mensajeFoco.textContent = 'Mantente concentrado hasta que termine el tiempo.';
   document.body.classList.remove('descanso');
   tiempoRestante = focoMinutos * 60;
@@ -562,7 +570,9 @@ document.addEventListener('keydown', (event) => {
 // Inicialización
 obtenerConfiguracion();
 obtenerHistorial();
+cargarPlantillas();
 cargarTema();
+cargarModoEstricto();
 dibujarEstadisticas();
 
 // Sincronizar ARIA al iniciar
@@ -573,11 +583,4 @@ try {
   pantallaHistorial.setAttribute('aria-hidden', pantallaHistorial.classList.contains('oculto') ? 'true' : 'false');
 } catch (e) {}
 
-botonVolver.addEventListener('click', () => {
-  pantallaHistorial.classList.add('oculto');
-  pantallaVolcado.classList.remove('oculto');
-});
-
-obtenerConfiguracion();
-obtenerHistorial();
-cargarTema();
+botonVolver.addEventListener('click', mostrarPantallaVolcado);
