@@ -10,6 +10,7 @@ const inputTarea = document.getElementById('tarea');
 const inputSubpaso = document.getElementById('subpaso');
 const inputFocoMinutos = document.getElementById('foco-minutos');
 const inputDescansoMinutos = document.getElementById('descanso-minutos');
+const presetButtons = document.querySelectorAll('.preset');
 const textoGranTarea = document.getElementById('texto-gran-tarea');
 const textoSubpaso = document.getElementById('texto-subpaso');
 const contenedorTiempo = document.getElementById('contenedor-tiempo');
@@ -37,6 +38,7 @@ function obtenerConfiguracion() {
 
   inputFocoMinutos.value = focoMinutos;
   inputDescansoMinutos.value = descansoMinutos;
+  actualizarPresetActivo();
 }
 
 function guardarConfiguracion() {
@@ -51,6 +53,39 @@ function guardarConfiguracion() {
 
   localStorage.setItem('focoMinutos', focoMinutos);
   localStorage.setItem('descansoMinutos', descansoMinutos);
+
+  const presetKey = `${focoMinutos}-${descansoMinutos}`;
+  const esPresetValido = Array.from(presetButtons).some(
+    (button) => `${button.dataset.foco}-${button.dataset.descanso}` === presetKey
+  );
+
+  if (esPresetValido) {
+    localStorage.setItem('presetSeleccionado', presetKey);
+  } else {
+    localStorage.removeItem('presetSeleccionado');
+  }
+
+  actualizarPresetActivo();
+}
+
+function seleccionarPreset(foco, descanso) {
+  focoMinutos = foco;
+  descansoMinutos = descanso;
+  inputFocoMinutos.value = focoMinutos;
+  inputDescansoMinutos.value = descansoMinutos;
+  localStorage.setItem('focoMinutos', focoMinutos);
+  localStorage.setItem('descansoMinutos', descansoMinutos);
+  localStorage.setItem('presetSeleccionado', `${focoMinutos}-${descansoMinutos}`);
+  actualizarPresetActivo();
+}
+
+function actualizarPresetActivo() {
+  presetButtons.forEach((button) => {
+    const focoPreset = parseInt(button.dataset.foco, 10);
+    const descansoPreset = parseInt(button.dataset.descanso, 10);
+    const esActivo = focoPreset === focoMinutos && descansoPreset === descansoMinutos;
+    button.classList.toggle('active', esActivo);
+  });
 }
 
 function obtenerHistorial() {
@@ -109,16 +144,29 @@ function mostrarPantallaFoco() {
   pantallaFoco.classList.remove('oculto');
 }
 
-function mostrarPantallaVolcado() {
-  pantallaFoco.classList.add('oculto');
-  pantallaVolcado.classList.remove('oculto');
-  botonSiguiente.classList.add('oculto');
-  mensajeFoco.textContent = 'Mantente concentrado hasta que termine el tiempo.';
-  document.body.classList.remove('descanso');
-  tiempoRestante = focoMinutos * 60;
-  contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
-  enDescanso = false;
-  clearInterval(intervalo);
+function dibujarHistorial() {
+  listaHistorial.innerHTML = '';
+
+  if (!historial.length) {
+    listaHistorial.innerHTML = '<p class="texto-intro">Aún no hay sesiones registradas.</p>';
+    return;
+  }
+
+  historial.forEach((registro) => {
+    const item = document.createElement('div');
+    item.className = 'historial-item';
+    item.innerHTML = `
+      <div class="historial-meta">
+        <strong>${registro.tarea}</strong>
+        <span>${new Date(registro.fecha).toLocaleString()}</span>
+      </div>
+      <p>${registro.subpaso}</p>
+      <div class="historial-detalle">
+        ${registro.foco} min foco · ${registro.descanso} min descanso · ${registro.completado ? 'Completado' : 'No completado'}
+      </div>
+    `;
+    listaHistorial.appendChild(item);
+  });
 }
 
 function iniciarTemporizador() {
@@ -179,6 +227,13 @@ botonIniciar.addEventListener('click', () => {
 
 botonSiguiente.addEventListener('click', mostrarPantallaVolcado);
 botonHistorial.addEventListener('click', mostrarPantallaHistorial);
+presetButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const foco = parseInt(button.dataset.foco, 10);
+    const descanso = parseInt(button.dataset.descanso, 10);
+    seleccionarPreset(foco, descanso);
+  });
+});
 botonVolver.addEventListener('click', () => {
   pantallaHistorial.classList.add('oculto');
   pantallaVolcado.classList.remove('oculto');

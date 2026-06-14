@@ -125,6 +125,34 @@ button.secondary:hover {
   background: #6b788b;
 }
 
+.preset-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.preset {
+  flex: 1 1 30%;
+  min-width: 80px;
+  border: none;
+  border-radius: 14px;
+  background: #d9e2f3;
+  color: #2b2b2b;
+  padding: 10px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.preset:hover {
+  background: #b7c7de;
+}
+
+.preset.active {
+  background: #5f6f83;
+  color: #fff;
+}
+
 button:disabled {
   opacity: 0.56;
   cursor: not-allowed;
