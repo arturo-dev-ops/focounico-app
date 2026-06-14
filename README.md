@@ -45,7 +45,7 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 ## 🛠️ Cómo contribuir
 
 - Notificaciones de navegador al terminar foco y descanso.
-- Sonido y vibración al cambiar de fase.
+- Sonido al cambiar de fase.
 - Mejorar la accesibilidad de entradas y botones.
 - Añadir más presets o intervalos personalizables.
 - Guardar tareas frecuentes y plantillas de sub-pasos.
