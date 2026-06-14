@@ -1,6 +1,6 @@
 Ideas para mejorar FocoÚnico
-- [x] Tareas principales completadas: 4/5.
-- [ ] Tarea restante: Limpieza de código y pruebas / documentación visual.
+- [x] Tareas principales completadas: 5/5.
+- [x] Tarea restante: Limpieza de código y pruebas / documentación visual.
 
 1. Ajustes de tiempos
 - [x] Permitir cambiar los minutos de foco y descanso.
