@@ -68,6 +68,21 @@ label,
   line-height: 1.55;
 }
 
+.config-group {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.config-field {
+  display: grid;
+  gap: 6px;
+}
+
+.config-field input {
+  width: 100%;
+}
+
 label {
   display: block;
   font-weight: 600;

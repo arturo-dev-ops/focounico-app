@@ -4,6 +4,8 @@ const botonIniciar = document.getElementById('boton-iniciar');
 const botonSiguiente = document.getElementById('boton-siguiente');
 const inputTarea = document.getElementById('tarea');
 const inputSubpaso = document.getElementById('subpaso');
+const inputFocoMinutos = document.getElementById('foco-minutos');
+const inputDescansoMinutos = document.getElementById('descanso-minutos');
 const textoGranTarea = document.getElementById('texto-gran-tarea');
 const textoSubpaso = document.getElementById('texto-subpaso');
 const contenedorTiempo = document.getElementById('contenedor-tiempo');
@@ -11,12 +13,39 @@ const mensajeFoco = document.getElementById('mensaje-foco');
 
 let intervalo;
 let tiempoRestante = 20 * 60;
+let focoMinutos = 20;
+let descansoMinutos = 5;
 let enDescanso = false;
 
 function formatearTiempo(segundos) {
   const minutos = String(Math.floor(segundos / 60)).padStart(2, '0');
   const segundosRestantes = String(segundos % 60).padStart(2, '0');
   return `${minutos}:${segundosRestantes}`;
+}
+
+function obtenerConfiguracion() {
+  const foco = parseInt(localStorage.getItem('focoMinutos'), 10);
+  const descanso = parseInt(localStorage.getItem('descansoMinutos'), 10);
+
+  focoMinutos = Number.isInteger(foco) && foco > 0 ? foco : 20;
+  descansoMinutos = Number.isInteger(descanso) && descanso > 0 ? descanso : 5;
+
+  inputFocoMinutos.value = focoMinutos;
+  inputDescansoMinutos.value = descansoMinutos;
+}
+
+function guardarConfiguracion() {
+  const foco = parseInt(inputFocoMinutos.value, 10);
+  const descanso = parseInt(inputDescansoMinutos.value, 10);
+
+  focoMinutos = Number.isInteger(foco) && foco > 0 ? foco : 20;
+  descansoMinutos = Number.isInteger(descanso) && descanso > 0 ? descanso : 5;
+
+  inputFocoMinutos.value = focoMinutos;
+  inputDescansoMinutos.value = descansoMinutos;
+
+  localStorage.setItem('focoMinutos', focoMinutos);
+  localStorage.setItem('descansoMinutos', descansoMinutos);
 }
 
 function mostrarPantallaFoco() {
@@ -30,7 +59,7 @@ function mostrarPantallaVolcado() {
   botonSiguiente.classList.add('oculto');
   mensajeFoco.textContent = 'Mantente concentrado hasta que termine el tiempo.';
   document.body.classList.remove('descanso');
-  tiempoRestante = 20 * 60;
+  tiempoRestante = focoMinutos * 60;
   contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
   enDescanso = false;
   clearInterval(intervalo);
@@ -58,7 +87,7 @@ function comenzarDescanso() {
   enDescanso = true;
   document.body.classList.add('descanso');
   mensajeFoco.textContent = '¡Para! Levántate, estira las piernas y bebe agua.';
-  tiempoRestante = 5 * 60;
+  tiempoRestante = descansoMinutos * 60;
   contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
   iniciarTemporizador();
 }
@@ -77,6 +106,8 @@ botonIniciar.addEventListener('click', () => {
     return;
   }
 
+  guardarConfiguracion();
+  tiempoRestante = focoMinutos * 60;
   textoGranTarea.textContent = tareaValor;
   textoSubpaso.textContent = subpasoValor;
   mostrarPantallaFoco();
@@ -84,3 +115,5 @@ botonIniciar.addEventListener('click', () => {
 });
 
 botonSiguiente.addEventListener('click', mostrarPantallaVolcado);
+
+obtenerConfiguracion();
