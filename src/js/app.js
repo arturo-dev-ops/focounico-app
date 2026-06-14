@@ -398,7 +398,6 @@ function mostrarPantallaHistorial() {
 }
 
 function mostrarPantallaVolcado() {
-  setAriaAndInert(pantallaVolcado, false);
   mostrarPantallaSegura(pantallaVolcado, inputTarea);
   botonSiguiente.classList.add('oculto');
   botonPausa.classList.add('oculto');
@@ -414,17 +413,9 @@ function mostrarPantallaVolcado() {
 }
 
 function mostrarPantallaFoco() {
-  setAriaAndInert(pantallaFoco, false);
-  pantallaFoco.classList.remove('oculto');
+  mostrarPantallaSegura(pantallaFoco, botonPausa);
   botonPausa.classList.remove('oculto');
   botonPausa.textContent = estaPausado ? 'Reanudar' : 'Pausa';
-  setTimeout(() => {
-    botonPausa.focus();
-    pantallaVolcado.classList.add('oculto');
-    pantallaHistorial.classList.add('oculto');
-    setAriaAndInert(pantallaVolcado, true);
-    setAriaAndInert(pantallaHistorial, true);
-  }, 0);
   actualizarProgreso();
 }
 
