@@ -1,5 +1,7 @@
 # FocoÚnico
 
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-live-brightgreen?style=flat-square&logo=github)](https://arturo-dev-ops.github.io/focounico-app/)
+
 FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profesionales a concentrarse en un solo sub-paso a la vez. La app combina temporizador de foco, descanso obligatorio y seguimiento sencillo con una interfaz limpia.
 
 ## 🚀 Qué hace ahora
