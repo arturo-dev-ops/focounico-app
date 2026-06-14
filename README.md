@@ -46,13 +46,30 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 - Historial con conteo de sesiones y minutos totales.
 - Tema oscuro con persistencia entre sesiones.
 
+## 🛠️ Tecnologías utilizadas
+
+- **HTML5:** Estructura semántica para la aplicación.
+- **CSS3:** Estilos responsivos, diseño limpio y variables personalizadas para el modo oscuro.
+- **JavaScript (Vanilla):** Lógica del temporizador, gestión del estado y persistencia de datos.
+- **LocalStorage API:** Persistencia de sesiones, configuración de tema y preferencias del usuario.
+
+## 🔮 Roadmap / Próximas mejoras
+
+- [ ] Notificaciones de navegador al terminar foco y descanso.
+- [ ] Sonido o alertas sonoras al cambiar de fase.
+- [ ] Mejorar la accesibilidad de entradas, botones e interfaz de usuario.
+- [ ] Añadir más presets o intervalos totalmente personalizables.
+- [ ] Guardar tareas frecuentes y plantillas de sub-pasos.
+
 ## 🛠️ Cómo contribuir
 
-- Notificaciones de navegador al terminar foco y descanso.
-- Sonido al cambiar de fase.
-- Mejorar la accesibilidad de entradas y botones.
-- Añadir más presets o intervalos personalizables.
-- Guardar tareas frecuentes y plantillas de sub-pasos.
+¡Las contribuciones son super bienvenidas! Si quieres mejorar FocoÚnico, sigue estos pasos:
+
+1. Haz un **Fork** de este repositorio.
+2. Crea una rama para tu mejora (`git checkout -b feature/nueva-funcionalidad`).
+3. Realiza tus cambios y haz commit con mensajes descriptivos (`git commit -m 'Añade nueva funcionalidad'`).
+4. Sube la rama a tu repositorio (`git push origin feature/nueva-funcionalidad`).
+5. Abre un **Pull Request** detallando tus cambios.
 
 ## 📌 Nota
 
