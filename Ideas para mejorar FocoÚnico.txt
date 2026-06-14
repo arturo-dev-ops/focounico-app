@@ -1,46 +1,46 @@
 Ideas para mejorar FocoÚnico
 1. Ajustes de tiempos
-Permitir cambiar los minutos de foco y descanso.
-Guardar la configuración en localStorage para que se recuerde al recargar.
-Añadir presets: 20/5, 25/5, 45/15, etc.
+[x] Permitir cambiar los minutos de foco y descanso.
+[x] Guardar la configuración en localStorage para que se recuerde al recargar.
+[x] Añadir presets: 20/5, 25/5, 45/15, etc.
 
 2. Historial de sesiones
-Registrar cada sesión completada en localStorage.
-Mostrar número de sesiones, tiempo total y últimos sub-pasos completados.
-Crear una pantalla simple de “Historial”.
+[x] Registrar cada sesión completada en localStorage.
+[x] Mostrar número de sesiones, tiempo total y últimos sub-pasos completados.
+[x] Crear una pantalla simple de “Historial”.
 
 3. Mejoras de UX
-Barra de progreso del temporizador.
-Sonido o vibración al acabar el foco y al terminar el descanso.
-Botón de pausa/reanudar.
-Teclas rápidas: empezar con Enter, pausar con Space.
+[x] Barra de progreso del temporizador.
+[ ] Sonido o vibración al acabar el foco y al terminar el descanso.
+[x] Botón de pausa/reanudar.
+[x] Teclas rápidas: empezar con Enter, pausar con Space.
 
 4. Visual & accesibilidad
-Modo oscuro / tema suave.
-Animaciones ligeras cuando cambia de pantalla.
-Mayor contraste en botones y texto.
-Validación de campos con mensajes en pantalla, no solo alert().
+[x] Modo oscuro / tema suave.
+[x] Animaciones ligeras cuando cambia de pantalla.
+[x] Mayor contraste en botones y texto.
+[x] Validación de campos con mensajes en pantalla, no solo alert().
 
 5. Organización del proyecto
-Crear carpetas:
-src
-images
-components/ si quieres separar HTML dinámico.
-Añadir un README con instrucciones de uso y de despliegue.
+[x] Crear carpetas:
+  - `src`
+  - `images`
+  - `components/` si quieres separar HTML dinámico.
+[x] Añadir un README con instrucciones de uso y de despliegue.
 
 6. Deploy y presentación
-Activar GitHub Pages para que funcione online.
-Incluir capturas en el README.
-Crear un favicon real y versiones 192x192, 512x512.
+[ ] Activar GitHub Pages para que funcione online.
+[x] Incluir capturas en el README.
+[x] Crear un favicon real y versiones 192x192, 512x512.
 
 7. Funcionalidades avanzadas
-Notificaciones de navegador (aunque solo si se usa desde HTTPS/GitHub Pages).
-Registro de tareas completadas vs pendientes.
-Guardar tareas frecuentes en una lista reutilizable.
-Añadir “modo enfoque estricto” que bloquee el botón hasta terminar el tiempo.
+[ ] Notificaciones de navegador (aunque solo si se usa desde HTTPS/GitHub Pages).
+[ ] Registro de tareas completadas vs pendientes.
+[ ] Guardar tareas frecuentes en una lista reutilizable.
+[ ] Añadir “modo enfoque estricto” que bloquee el botón hasta terminar el tiempo.
 
 8. Código más limpio
-Separar lógica de JS en funciones más pequeñas.
-Añadir comentarios claros.
-Si quieres ir más lejos: usar un pequeño bundler o npm para automatizar build, aunque no es necesario.
+[x] Separar lógica de JS en funciones más pequeñas.
+[x] Añadir comentarios claros.
+[ ] Si quieres ir más lejos: usar un pequeño bundler o npm para automatizar build, aunque no es necesario.
 Si te interesa, puedo implementar cualquiera de estas ideas paso a paso.
