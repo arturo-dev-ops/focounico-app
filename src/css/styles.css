@@ -88,7 +88,8 @@ label {
   font-weight: 600;
 }
 
-input {
+input,
+select {
   width: 100%;
   min-height: 46px;
   margin-bottom: 18px;
@@ -97,6 +98,13 @@ input {
   border: 1px solid rgba(43, 43, 43, 0.16);
   background: #faf6f1;
   font-size: 1rem;
+}
+
+input:disabled,
+select:disabled,
+button:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
 }
 
 button {
@@ -115,6 +123,11 @@ button {
 button:hover {
   transform: translateY(-1px);
   background: #4a5b6c;
+}
+
+button:focus-visible {
+  outline: 3px solid #ffd166;
+  outline-offset: 4px;
 }
 
 button.secondary {
