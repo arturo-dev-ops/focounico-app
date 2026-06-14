@@ -11,6 +11,11 @@ const inputSubpaso = document.getElementById('subpaso');
 const inputFocoMinutos = document.getElementById('foco-minutos');
 const inputDescansoMinutos = document.getElementById('descanso-minutos');
 const presetButtons = document.querySelectorAll('.preset');
+const botonTema = document.getElementById('boton-tema');
+const mensajeError = document.getElementById('mensaje-error');
+const botonPausa = document.getElementById('boton-pausa');
+const barraAvance = document.getElementById('barra-avance');
+const estadisticasHistorial = document.getElementById('estadisticas-historial');
 const textoGranTarea = document.getElementById('texto-gran-tarea');
 const textoSubpaso = document.getElementById('texto-subpaso');
 const contenedorTiempo = document.getElementById('contenedor-tiempo');
@@ -21,6 +26,8 @@ let tiempoRestante = 20 * 60;
 let focoMinutos = 20;
 let descansoMinutos = 5;
 let enDescanso = false;
+let estaPausado = false;
+let temaOscuro = false;
 let historial = [];
 
 function formatearTiempo(segundos) {
@@ -66,6 +73,67 @@ function guardarConfiguracion() {
   }
 
   actualizarPresetActivo();
+}
+
+function mostrarError(mensaje) {
+  mensajeError.textContent = mensaje;
+  mensajeError.classList.remove('oculto');
+}
+
+function ocultarError() {
+  mensajeError.textContent = '';
+  mensajeError.classList.add('oculto');
+}
+
+function actualizarProgreso() {
+  const totalSegundos = enDescanso ? descansoMinutos * 60 : focoMinutos * 60;
+  const avance = totalSegundos > 0 ? Math.round(((totalSegundos - tiempoRestante) / totalSegundos) * 100) : 0;
+  barraAvance.style.width = `${Math.min(Math.max(avance, 0), 100)}%`;
+}
+
+function establecerTema(oscuro) {
+  temaOscuro = oscuro;
+  document.body.classList.toggle('dark-mode', oscuro);
+  botonTema.textContent = oscuro ? 'Tema claro' : 'Tema oscuro';
+  localStorage.setItem('temaOscuro', oscuro ? '1' : '0');
+}
+
+function cargarTema() {
+  const valorTema = localStorage.getItem('temaOscuro');
+  establecerTema(valorTema === '1');
+}
+
+function dibujarEstadisticas() {
+  const total = historial.length;
+  const completadas = historial.filter((item) => item.completado).length;
+  const minutosFoco = historial.reduce((sum, item) => sum + Number(item.foco), 0);
+  const minutosDescanso = historial.reduce((sum, item) => sum + Number(item.descanso), 0);
+
+  estadisticasHistorial.innerHTML = `
+    <span><strong>Sesiones</strong><strong>${total}</strong></span>
+    <span><strong>Completadas</strong><strong>${completadas}</strong></span>
+    <span><strong>Foco total</strong><strong>${minutosFoco} min</strong></span>
+    <span><strong>Descanso total</strong><strong>${minutosDescanso} min</strong></span>
+  `;
+}
+
+function alternarPausa() {
+  if (!intervalo) {
+    return;
+  }
+
+  estaPausado = !estaPausado;
+  if (estaPausado) {
+    clearInterval(intervalo);
+    botonPausa.textContent = 'Reanudar';
+    mensajeFoco.textContent = 'Temporizador pausado. Pulsa para continuar.';
+  } else {
+    botonPausa.textContent = 'Pausa';
+    mensajeFoco.textContent = enDescanso
+      ? 'Disfruta tu descanso hasta que termine el tiempo.'
+      : 'Mantente concentrado hasta que termine el tiempo.';
+    iniciarTemporizador();
+  }
 }
 
 function seleccionarPreset(foco, descanso) {
@@ -130,11 +198,13 @@ function mostrarPantallaVolcado() {
   pantallaHistorial.classList.add('oculto');
   pantallaVolcado.classList.remove('oculto');
   botonSiguiente.classList.add('oculto');
+  botonPausa.classList.add('oculto');
+  estaPausado = false;
   mensajeFoco.textContent = 'Mantente concentrado hasta que termine el tiempo.';
   document.body.classList.remove('descanso');
   tiempoRestante = focoMinutos * 60;
   contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
-  enDescanso = false;
+  actualizarProgreso();
   clearInterval(intervalo);
 }
 
@@ -142,6 +212,9 @@ function mostrarPantallaFoco() {
   pantallaVolcado.classList.add('oculto');
   pantallaHistorial.classList.add('oculto');
   pantallaFoco.classList.remove('oculto');
+  botonPausa.classList.remove('oculto');
+  botonPausa.textContent = estaPausado ? 'Reanudar' : 'Pausa';
+  actualizarProgreso();
 }
 
 function dibujarHistorial() {
@@ -171,10 +244,15 @@ function dibujarHistorial() {
 
 function iniciarTemporizador() {
   clearInterval(intervalo);
+  estaPausado = false;
+  botonPausa.textContent = 'Pausa';
   contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
+  actualizarProgreso();
+
   intervalo = setInterval(() => {
     tiempoRestante -= 1;
     contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
+    actualizarProgreso();
 
     if (tiempoRestante <= 0) {
       clearInterval(intervalo);
@@ -194,6 +272,7 @@ function comenzarDescanso() {
   mensajeFoco.textContent = '¡Para! Levántate, estira las piernas y bebe agua.';
   tiempoRestante = descansoMinutos * 60;
   contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
+  actualizarProgreso();
   iniciarTemporizador();
 }
 
@@ -227,6 +306,10 @@ botonIniciar.addEventListener('click', () => {
 
 botonSiguiente.addEventListener('click', mostrarPantallaVolcado);
 botonHistorial.addEventListener('click', mostrarPantallaHistorial);
+buttonTema.addEventListener('click', () => {
+  establecerTema(!temaOscuro);
+});
+botonPausa.addEventListener('click', alternarPausa);
 presetButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const foco = parseInt(button.dataset.foco, 10);
@@ -234,6 +317,18 @@ presetButtons.forEach((button) => {
     seleccionarPreset(foco, descanso);
   });
 });
+
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'Enter' && !pantallaVolcado.classList.contains('oculto')) {
+    botonIniciar.click();
+  }
+
+  if (event.code === 'Space' && !pantallaFoco.classList.contains('oculto')) {
+    event.preventDefault();
+    alternarPausa();
+  }
+});
+
 botonVolver.addEventListener('click', () => {
   pantallaHistorial.classList.add('oculto');
   pantallaVolcado.classList.remove('oculto');
@@ -241,3 +336,4 @@ botonVolver.addEventListener('click', () => {
 
 obtenerConfiguracion();
 obtenerHistorial();
+cargarTema();

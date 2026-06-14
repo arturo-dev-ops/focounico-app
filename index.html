@@ -26,6 +26,7 @@
     <section id="pantalla-volcado" class="pantalla">
       <div class="card">
         <img src="assets/images/FocoUnico.png" alt="FocoÚnico logo" class="logo" />
+        <button id="boton-tema" type="button" class="secondary small">Tema oscuro</button>
         <h1>FocoÚnico</h1>
         <p class="texto-intro">Escribe tu gran tarea y el sub-paso que vas a completar ahora.</p>
         <label for="tarea">Gran tarea</label>
@@ -42,6 +43,7 @@
             <input id="descanso-minutos" type="number" min="1" value="5" />
           </div>
         </div>
+        <p id="mensaje-error" class="error-message oculto" aria-live="assertive"></p>
         <div class="preset-group">
           <button type="button" class="preset" data-foco="20" data-descanso="5">20/5</button>
           <button type="button" class="preset" data-foco="25" data-descanso="5">25/5</button>
@@ -58,7 +60,9 @@
         <h2 id="texto-gran-tarea"></h2>
         <p id="texto-subpaso" class="subpaso"></p>
         <div id="contenedor-tiempo" class="cronometro">20:00</div>
+        <div class="barra-progreso"><div id="barra-avance"></div></div>
         <p id="mensaje-foco" class="mensaje">Mantente concentrado hasta que termine el tiempo.</p>
+        <button id="boton-pausa" class="secondary oculto" type="button">Pausa</button>
         <button id="boton-siguiente" class="oculto" type="button">Siguiente tarea</button>
       </div>
     </section>
@@ -66,6 +70,7 @@
     <section id="pantalla-historial" class="pantalla oculto">
       <div class="card historial-card">
         <div class="etiqueta">Historial de sesiones</div>
+        <div id="estadisticas-historial" class="historial-stats"></div>
         <div id="lista-historial" class="historial-list"></div>
         <button id="boton-volver" type="button">Volver</button>
       </div>
