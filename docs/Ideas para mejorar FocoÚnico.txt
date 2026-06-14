@@ -29,15 +29,10 @@ Ideas para mejorar FocoÚnico
 - [x] Añadir un README con instrucciones de uso y de despliegue.
 
 6. Deploy y presentación
-- [ ] Activar GitHub Pages para que funcione online.
+- [x] Activar GitHub Pages para que funcione online.
 - [x] Incluir capturas en el README.
 - [x] Crear un favicon real y versiones 192x192, 512x512.
 
-7. Funcionalidades avanzadas
-- [x] Notificaciones de navegador (aunque solo si se usa desde HTTPS/GitHub Pages).
-- [ ] Registro de tareas completadas vs pendientes.
-- [ ] Guardar tareas frecuentes en una lista reutilizable.
-- [ ] Añadir “modo enfoque estricto” que bloquee el botón hasta terminar el tiempo.
 7. Funcionalidades avanzadas
 - [x] Notificaciones de navegador (aunque solo si se usa desde HTTPS/GitHub Pages).
 - [ ] Registro de tareas completadas vs pendientes.
