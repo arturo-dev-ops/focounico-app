@@ -17,9 +17,10 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 ## 📁 Estructura del proyecto
 
 - `index.html` - estructura HTML de la aplicación.
-- `src/styles.css` - estilos y tema visual.
-- `src/app.js` - lógica del temporizador, persistencia y navegación.
+- `src/css/styles.css` - estilos y tema visual.
+- `src/js/app.js` - lógica del temporizador, persistencia y navegación.
 - `assets/images/` - recursos gráficos y favicon.
+- `docs/` - archivos de planificación e ideas.
 
 ## 🧪 Uso rápido
 
