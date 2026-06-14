@@ -59,8 +59,8 @@ Este proyecto es una versión progresiva del MVP inicial. Ya incorpora ajustes d
 La aplicación está lista para publicarse como sitio estático. Para desplegar en GitHub Pages:
 
 1. Asegúrate de tener el repo en GitHub bajo `https://github.com/arturo-dev-ops/focounico-app`.
-2. Añade o actualiza la rama `gh-pages` con el contenido del sitio.
-3. Activa GitHub Pages en los ajustes del repositorio y selecciona la rama `gh-pages` como fuente.
+2. Haz push a la rama `main`; el workflow de GitHub Actions creado en `.github/workflows/deploy-pages.yml` generará o actualizará automáticamente la rama `gh-pages`.
+3. En GitHub, ve a **Settings > Pages** y selecciona la rama `gh-pages` como fuente.
 4. El sitio debería estar disponible en `https://arturo-dev-ops.github.io/focounico-app/`.
 
 Este repositorio incluye un archivo `.nojekyll` para evitar que GitHub procese el sitio con Jekyll.
