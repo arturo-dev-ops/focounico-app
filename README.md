@@ -17,7 +17,6 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 - [x] Guardar tareas frecuentes como plantillas reutilizables.
 - [x] Modo estricto que bloquea edición y navegación durante la sesión.
 - [x] Validación en pantalla para entradas incompletas.
-- [ ] Capturas de pantalla en el README.
 
 ## 📁 Estructura del proyecto
 
