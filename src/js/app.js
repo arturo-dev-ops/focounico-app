@@ -118,6 +118,42 @@ function reproducirSonido(tipo) {
   }
 }
 
+function solicitarPermisoNotificacion() {
+  if (!('Notification' in window) || Notification.permission !== 'default') {
+    return;
+  }
+
+  Notification.requestPermission().then((perm) => {
+    if (perm === 'granted') {
+      console.log('Notificaciones habilitadas');
+    }
+  });
+}
+
+function mostrarNotificacion(tipo) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') {
+    return;
+  }
+
+  const titulo = tipo === 'foco' ? 'Foco completado' : 'Descanso terminado';
+  const cuerpo = tipo === 'foco'
+    ? 'Termina el ciclo y disfruta un pequeño descanso.'
+    : 'Tu descanso ha terminado. Vuelve a concentrarte.';
+
+  const notificacion = new Notification(titulo, {
+    body: cuerpo,
+    icon: 'assets/images/FocoUnico.png',
+  });
+
+  setTimeout(() => notificacion.close(), 5000);
+}
+
+function vibrar() {
+  if (navigator.vibrate) {
+    navigator.vibrate([120, 60, 120]);
+  }
+}
+
 function establecerTema(oscuro) {
   temaOscuro = oscuro;
   document.body.classList.toggle('dark-mode', oscuro);
@@ -285,9 +321,13 @@ function iniciarTemporizador() {
       clearInterval(intervalo);
       if (!enDescanso) {
         reproducirSonido('foco');
+        vibrar();
+        mostrarNotificacion('foco');
         comenzarDescanso();
       } else {
         reproducirSonido('descanso');
+        vibrar();
+        mostrarNotificacion('descanso');
         finalizarDescanso();
         registrarSesion(true);
       }
@@ -325,6 +365,7 @@ botonIniciar.addEventListener('click', () => {
     return;
   }
 
+  solicitarPermisoNotificacion();
   guardarConfiguracion();
   tiempoRestante = focoMinutos * 60;
   textoGranTarea.textContent = tareaValor;

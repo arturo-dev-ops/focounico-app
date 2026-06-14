@@ -11,7 +11,7 @@ Ideas para mejorar FocoÚnico
 
 3. Mejoras de UX
 [x] Barra de progreso del temporizador.
-[ ] Sonido o vibración al acabar el foco y al terminar el descanso.
+[x] Sonido o vibración al acabar el foco y al terminar el descanso.
 [x] Botón de pausa/reanudar.
 [x] Teclas rápidas: empezar con Enter, pausar con Space.
 
@@ -34,7 +34,7 @@ Ideas para mejorar FocoÚnico
 [x] Crear un favicon real y versiones 192x192, 512x512.
 
 7. Funcionalidades avanzadas
-[ ] Notificaciones de navegador (aunque solo si se usa desde HTTPS/GitHub Pages).
+[x] Notificaciones de navegador (aunque solo si se usa desde HTTPS/GitHub Pages).
 [ ] Registro de tareas completadas vs pendientes.
 [ ] Guardar tareas frecuentes en una lista reutilizable.
 [ ] Añadir “modo enfoque estricto” que bloquee el botón hasta terminar el tiempo.
