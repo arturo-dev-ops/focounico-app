@@ -10,9 +10,12 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 - [x] Temporizador de foco con barra de progreso visual.
 - [x] Descanso automático al terminar el foco.
 - [x] Botón de pausa / reanudar para detener y volver a iniciar el temporizador.
-- [x] Modo oscuro que se guarda en `localStorage`.
+- [x] Modo oscuro con persistencia en `localStorage` y transición suave.
 - [x] Historial de sesiones almacenado en `localStorage` con estadísticas básicas.
+- [x] Guardar tareas frecuentes como plantillas reutilizables.
+- [x] Modo estricto que bloquea edición y navegación durante la sesión.
 - [x] Validación en pantalla para entradas incompletas.
+- [ ] Capturas de pantalla en el README.
 
 ## 📁 Estructura del proyecto
 
