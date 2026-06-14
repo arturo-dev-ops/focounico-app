@@ -1,4 +1,7 @@
 Ideas para mejorar FocoÚnico
+- [x] Tareas principales completadas: 4/5.
+- [ ] Tarea restante: Limpieza de código y pruebas / documentación visual.
+
 1. Ajustes de tiempos
 - [x] Permitir cambiar los minutos de foco y descanso.
 - [x] Guardar la configuración en localStorage para que se recuerde al recargar.
@@ -30,7 +33,7 @@ Ideas para mejorar FocoÚnico
 
 6. Deploy y presentación
 - [x] Activar GitHub Pages para que funcione online.
-- [x] Incluir capturas en el README.
+- [ ] Incluir capturas en el README.
 - [x] Crear un favicon real y versiones 192x192, 512x512.
 
 7. Funcionalidades avanzadas
@@ -43,4 +46,6 @@ Ideas para mejorar FocoÚnico
 - [x] Separar lógica de JS en funciones más pequeñas.
 - [x] Añadir comentarios claros.
 - [ ] Si quieres ir más lejos: usar un pequeño bundler o npm para automatizar build, aunque no es necesario.
-Si te interesa, puedo implementar cualquiera de estas ideas paso a paso.
+
+Estado actual: El MVP está implementado con modo oscuro persistente, plantillas, historial y modo estricto. 
+El único pendiente real es el registro detallado de tareas completadas vs pendientes y añadir capturas de pantalla en la documentación.
