@@ -4,7 +4,7 @@
 
 FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profesionales a concentrarse en un solo sub-paso a la vez. La app combina temporizador de foco, descanso obligatorio y seguimiento sencillo con una interfaz limpia.
 
-## 🚀 Qué hace ahora
+## 🚀 Características
 
 - [x] Pantalla inicial para escribir una gran tarea y el sub-paso que vas a completar.
 - [x] Permite elegir presets de tiempo: `20/5`, `25/5` y `45/15`.
@@ -17,25 +17,43 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 - [x] Guardar tareas frecuentes como plantillas reutilizables.
 - [x] Modo estricto que bloquea edición y navegación durante la sesión.
 - [x] Validación en pantalla para entradas incompletas.
+- [x] Registro de tareas completadas vs pendientes con contador visual.
+- [x] Notificaciones de navegador y sonido al terminar foco/descanso.
+- [x] Teclas rápidas: Enter para iniciar, Space para pausar/reanudar.
+
+## 📸 Capturas de pantalla
+
+> *Próximamente: capturas de la interfaz en modo claro y oscuro.*
+> Puedes ver la aplicación en vivo aquí: [https://arturo-dev-ops.github.io/focounico-app/](https://arturo-dev-ops.github.io/focounico-app/)
 
 ## 📁 Estructura del proyecto
 
-- `index.html` - estructura HTML de la aplicación.
-- `src/css/styles.css` - estilos y tema visual.
-- `src/js/app.js` - lógica del temporizador, persistencia y navegación.
-- `assets/images/` - recursos gráficos y favicon.
-- `docs/` - archivos de planificación e ideas.
+```text
+├── index.html              # Estructura HTML de la aplicación
+├── README.md               # Documentación del proyecto
+├── assets/
+│   └── images/             # Recursos gráficos y favicon
+├── docs/
+│   ├── Ideas para mejorar FocoÚnico.txt
+│   └── Planificacion_FocoUnico.txt
+└── src/
+    ├── css/
+    │   └── styles.css      # Estilos y tema visual
+    └── js/
+        └── app.js          # Lógica del temporizador, persistencia y navegación
+```
 
 ## 🧪 Uso rápido
 
-1. Abre `index.html` en el navegador.
+1. Abre `index.html` en el navegador o visita la [versión online](https://arturo-dev-ops.github.io/focounico-app/).
 2. Ingresa tu **Gran tarea** y el **Sub-paso**.
 3. Elige un preset o ajusta los minutos de foco y descanso.
-4. Haz clic en **Iniciar Foco**.
+4. Haz clic en **Iniciar Foco** (o presiona `Enter`).
 5. Usa **Pausa** para detener el temporizador o la tecla `Space` para alternar pausa.
 6. Al terminar el foco se inicia el descanso automáticamente.
 7. Al terminar el descanso, pulsa **Siguiente tarea** para volver al inicio.
-8. Consulta el historial para ver sesiones completadas y estadísticas.
+8. Consulta el **historial** para ver sesiones completadas y estadísticas.
+9. Revisa el contador de **tareas pendientes** para saber cuántas sesiones te quedan.
 
 ## ✨ Características principales
 
@@ -45,6 +63,11 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 - Pausa/reanuda sin perder el estado.
 - Historial con conteo de sesiones y minutos totales.
 - Tema oscuro con persistencia entre sesiones.
+- Seguimiento de tareas completadas vs pendientes.
+- Sonido y vibración al completar foco/descanso.
+- Notificaciones de navegador (HTTPS requerido).
+- Modo estricto para evitar distracciones.
+- Plantillas de tareas frecuentes reutilizables.
 
 ## 🛠️ Tecnologías utilizadas
 
@@ -52,14 +75,17 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 - **CSS3:** Estilos responsivos, diseño limpio y variables personalizadas para el modo oscuro.
 - **JavaScript (Vanilla):** Lógica del temporizador, gestión del estado y persistencia de datos.
 - **LocalStorage API:** Persistencia de sesiones, configuración de tema y preferencias del usuario.
+- **Web Audio API:** Sonidos de notificación al completar ciclos.
+- **Notification API:** Notificaciones de navegador (cuando está en HTTPS).
 
 ## 🔮 Roadmap / Próximas mejoras
 
-- [ ] Notificaciones de navegador al terminar foco y descanso.
-- [ ] Sonido o alertas sonoras al cambiar de fase.
-- [ ] Mejorar la accesibilidad de entradas, botones e interfaz de usuario.
-- [ ] Añadir más presets o intervalos totalmente personalizables.
-- [ ] Guardar tareas frecuentes y plantillas de sub-pasos.
+- [ ] Capturas de pantalla en la documentación (README).
+- [ ] Limpieza de tareas pendientes completadas automáticamente.
+- [ ] Estadísticas avanzadas (promedio de sesiones por día, racha actual).
+- [ ] Exportar historial a CSV/JSON.
+- [ ] Personalización de sonidos y volumen.
+- [ ] Soporte para PWA (instalable en móvil/escritorio).
 
 ## 🛠️ Cómo contribuir
 
@@ -70,10 +96,6 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 3. Realiza tus cambios y haz commit con mensajes descriptivos (`git commit -m 'Añade nueva funcionalidad'`).
 4. Sube la rama a tu repositorio (`git push origin feature/nueva-funcionalidad`).
 5. Abre un **Pull Request** detallando tus cambios.
-
-## 📌 Nota
-
-Este proyecto es una versión progresiva del MVP inicial. Ya incorpora ajustes de tiempo, historial y mejoras de experiencia, y puede seguir evolucionando con más funciones de productividad.
 
 ## 🌐 Despliegue en GitHub Pages
 

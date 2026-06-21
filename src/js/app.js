@@ -35,6 +35,7 @@ let temaOscuro = false;
 let historial = [];
 let audioContext;
 let modoEstricto = false;
+let sesionEnCurso = null;
 
 function formatearTiempo(segundos) {
   const minutos = String(Math.floor(segundos / 60)).padStart(2, '0');
@@ -232,6 +233,67 @@ function dibujarEstadisticas() {
     <span><strong>Foco total</strong><strong>${minutosFoco} min</strong></span>
     <span><strong>Descanso total</strong><strong>${minutosDescanso} min</strong></span>
   `;
+}
+
+function obtenerSesionesPendientes() {
+  const raw = localStorage.getItem('sesionesPendientes');
+  let pendientes = [];
+  try { pendientes = raw ? JSON.parse(raw) : []; } catch (e) { pendientes = []; }
+  return pendientes;
+}
+
+function guardarSesionesPendientes(pendientes) {
+  localStorage.setItem('sesionesPendientes', JSON.stringify(pendientes));
+}
+
+function agregarSesionPendiente(tarea, subpaso) {
+  const pendientes = obtenerSesionesPendientes();
+  pendientes.unshift({
+    id: Date.now() + Math.random(),
+    tarea,
+    subpaso,
+    fecha: new Date().toISOString(),
+    completada: false,
+  });
+  if (pendientes.length > 50) pendientes.pop();
+  guardarSesionesPendientes(pendientes);
+  actualizarContadorPendientes();
+}
+
+function marcarSesionCompletada(id) {
+  const pendientes = obtenerSesionesPendientes();
+  const sesion = pendientes.find(p => p.id === id);
+  if (sesion) sesion.completada = true;
+  guardarSesionesPendientes(pendientes);
+  actualizarContadorPendientes();
+}
+
+function actualizarContadorPendientes() {
+  const pendientes = obtenerSesionesPendientes();
+  const sinCompletar = pendientes.filter(p => !p.completada).length;
+  // Buscar o crear indicador en la pantalla de volcado
+  let indicador = document.getElementById('indicador-pendientes');
+  if (!indicador) {
+    const card = document.querySelector('#pantalla-volcado .card');
+    if (!card) return;
+    indicador = document.createElement('div');
+    indicador.id = 'indicador-pendientes';
+    indicador.className = 'pendientes-indicator';
+    card.insertBefore(indicador, card.querySelector('#boton-historial'));
+  }
+  if (sinCompletar > 0) {
+    indicador.innerHTML = `📋 <strong>${sinCompletar}</strong> tarea${sinCompletar !== 1 ? 's' : ''} pendiente${sinCompletar !== 1 ? 's' : ''}`;
+    indicador.classList.remove('oculto');
+  } else {
+    indicador.classList.add('oculto');
+  }
+}
+
+function limpiarPendientesCompletadas() {
+  const pendientes = obtenerSesionesPendientes();
+  const activas = pendientes.filter(p => !p.completada);
+  guardarSesionesPendientes(activas);
+  actualizarContadorPendientes();
 }
 
 function alternarPausa() {
@@ -516,11 +578,35 @@ botonIniciar.addEventListener('click', () => {
   tiempoRestante = focoMinutos * 60;
   textoGranTarea.textContent = tareaValor;
   textoSubpaso.textContent = subpasoValor;
+
+  // Guardar sesión como pendiente
+  sesionEnCurso = {
+    tarea: tareaValor,
+    subpaso: subpasoValor
+  };
+  agregarSesionPendiente(tareaValor, subpasoValor);
+
   mostrarPantallaFoco();
   iniciarTemporizador();
 });
 
-botonSiguiente.addEventListener('click', mostrarPantallaVolcado);
+botonSiguiente.addEventListener('click', () => {
+  // Marcar la sesión actual como completada en pendientes
+  if (sesionEnCurso) {
+    const pendientes = obtenerSesionesPendientes();
+    // Buscar la última sesión con la misma tarea/subpaso no completada
+    const sesionPendiente = pendientes.find(p =>
+      !p.completada &&
+      p.tarea === sesionEnCurso.tarea &&
+      p.subpaso === sesionEnCurso.subpaso
+    );
+    if (sesionPendiente) {
+      marcarSesionCompletada(sesionPendiente.id);
+    }
+    sesionEnCurso = null;
+  }
+  mostrarPantallaVolcado();
+});
 botonHistorial.addEventListener('click', mostrarPantallaHistorial);
 botonTema.addEventListener('click', () => {
   establecerTema(!temaOscuro);
@@ -565,6 +651,7 @@ cargarPlantillas();
 cargarTema();
 cargarModoEstricto();
 dibujarEstadisticas();
+actualizarContadorPendientes();
 
 // Sincronizar ARIA al iniciar
 try {

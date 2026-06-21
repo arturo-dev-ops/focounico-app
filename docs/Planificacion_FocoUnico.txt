@@ -73,7 +73,7 @@ El proyecto está 100% COMPLETADO cuando:
 3. Al dar clic al botón, ves solo el sub-paso y el tiempo corriendo.
 4. Al llegar a cero, te avisa y te obliga a descansar sin poder saltártelo.
 
-Estado actual: MVP implementado con ajustes de tiempo, historial, plantillas, modo estricto, modo oscuro y despliegue listo en GitHub Pages. Queda pendiente el registro detallado de tareas completadas vs pendientes y capturas de pantalla en la documentación.
+Estado actual: MVP implementado con ajustes de tiempo, historial, plantillas, modo estricto, modo oscuro, registro de tareas completadas vs pendientes y despliegue listo en GitHub Pages. Queda pendiente añadir capturas de pantalla en el README y la limpieza automática de pendientes completados.
 
 ===============================================================================
                  ¡REGLA DE ORO DE BRAIS MOURE EN EL VIDEO!

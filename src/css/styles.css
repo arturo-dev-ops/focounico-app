@@ -258,6 +258,22 @@ button:disabled {
   margin-bottom: 8px;
 }
 
+.pendientes-indicator {
+  text-align: center;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: #eef2f7;
+  color: #2b2b2b;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+body.dark-mode .pendientes-indicator {
+  background: #071018;
+  color: #d7eef0;
+}
+
 .oculto {
   display: none;
 }
