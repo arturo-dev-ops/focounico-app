@@ -102,5 +102,5 @@ FocoÚnico es una aplicación web ultra-simple para ayudar a estudiantes y profe
 La aplicación está lista para publicarse como sitio estático. Para desplegar en GitHub Pages:
 
 1. Asegúrate de tener el repo en GitHub bajo `https://github.com/arturo-dev-ops/focounico-app`.
-3. En GitHub, ve a **Settings > Pages** y selecciona la rama `gh-pages` como fuente.
-4. El sitio debería estar disponible en `https://arturo-dev-ops.github.io/focounico-app/`.
+2. En GitHub, ve a **Settings > Pages** y selecciona la rama `gh-pages` como fuente.
+3. El sitio debería estar disponible en `https://arturo-dev-ops.github.io/focounico-app/`.
