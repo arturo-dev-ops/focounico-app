@@ -74,6 +74,7 @@
         <div class="barra-progreso"><div id="barra-avance"></div></div>
         <p id="mensaje-foco" class="mensaje">Mantente concentrado hasta que termine el tiempo.</p>
         <button id="boton-pausa" class="secondary oculto" type="button">Pausa</button>
+        <button id="boton-interrumpir" class="secondary oculto" type="button">Salir</button>
         <button id="boton-siguiente" class="oculto" type="button">Siguiente tarea</button>
       </div>
     </section>
@@ -83,10 +84,13 @@
         <div class="etiqueta">Historial de sesiones</div>
         <div id="estadisticas-historial" class="historial-stats"></div>
         <div id="lista-historial" class="historial-list"></div>
-        <button id="boton-volver" type="button">Volver</button>
+        <div class="historial-actions">
+          <button id="boton-borrar-historial" type="button" class="secondary small danger">Borrar historial</button>
+          <button id="boton-volver" type="button">Volver</button>
+        </div>
       </div>
     </section>
   </main>
-  <script src="src/js/app.js"></script>
+  <script type="module" src="src/js/app.js"></script>
 </body>
 </html>

@@ -1,3 +1,35 @@
+/* ===================== HELPERS DRY ===================== */
+
+/** Lee y parsea JSON de localStorage con fallback seguro */
+function leerJSON(clave) {
+  try {
+    const raw = localStorage.getItem(clave);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Serializa y guarda un valor como JSON en localStorage */
+function escribirJSON(clave, datos) {
+  localStorage.setItem(clave, JSON.stringify(datos));
+}
+
+/** Valida que un número sea entero positivo */
+function enteroPositivo(valor, fallback) {
+  const n = parseInt(valor, 10);
+  return Number.isInteger(n) && n > 0 ? n : fallback;
+}
+
+/** Reproduce sonido, vibra y muestra notificación del tipo indicado ('foco' | 'descanso') */
+function alertarFinDeCiclo(tipo) {
+  reproducirSonido(tipo);
+  vibrar();
+  mostrarNotificacion(tipo);
+}
+
+/* ===================== CONSTANTES DOM ===================== */
+
 const pantallaVolcado = document.getElementById('pantalla-volcado');
 const pantallaFoco = document.getElementById('pantalla-foco');
 const botonIniciar = document.getElementById('boton-iniciar');
@@ -18,12 +50,15 @@ const botonGuardarPlantilla = document.getElementById('boton-guardar-plantilla')
 const botonEliminarPlantilla = document.getElementById('boton-eliminar-plantilla');
 const mensajeError = document.getElementById('mensaje-error');
 const botonPausa = document.getElementById('boton-pausa');
+const botonInterrumpir = document.getElementById('boton-interrumpir');
 const barraAvance = document.getElementById('barra-avance');
 const estadisticasHistorial = document.getElementById('estadisticas-historial');
 const textoGranTarea = document.getElementById('texto-gran-tarea');
 const textoSubpaso = document.getElementById('texto-subpaso');
 const contenedorTiempo = document.getElementById('contenedor-tiempo');
 const mensajeFoco = document.getElementById('mensaje-foco');
+
+/* ===================== ESTADO GLOBAL ===================== */
 
 let intervalo;
 let tiempoRestante = 20 * 60;
@@ -36,6 +71,9 @@ let historial = [];
 let audioContext;
 let modoEstricto = false;
 let sesionEnCurso = null;
+let sesionCargadaParaReanudar = null;
+
+/* ===================== UTILIDADES ===================== */
 
 function formatearTiempo(segundos) {
   const minutos = String(Math.floor(segundos / 60)).padStart(2, '0');
@@ -44,27 +82,18 @@ function formatearTiempo(segundos) {
 }
 
 function obtenerConfiguracion() {
-  const foco = parseInt(localStorage.getItem('focoMinutos'), 10);
-  const descanso = parseInt(localStorage.getItem('descansoMinutos'), 10);
-
-  focoMinutos = Number.isInteger(foco) && foco > 0 ? foco : 20;
-  descansoMinutos = Number.isInteger(descanso) && descanso > 0 ? descanso : 5;
-
+  focoMinutos = enteroPositivo(localStorage.getItem('focoMinutos'), 20);
+  descansoMinutos = enteroPositivo(localStorage.getItem('descansoMinutos'), 5);
   inputFocoMinutos.value = focoMinutos;
   inputDescansoMinutos.value = descansoMinutos;
   actualizarPresetActivo();
 }
 
 function guardarConfiguracion() {
-  const foco = parseInt(inputFocoMinutos.value, 10);
-  const descanso = parseInt(inputDescansoMinutos.value, 10);
-
-  focoMinutos = Number.isInteger(foco) && foco > 0 ? foco : 20;
-  descansoMinutos = Number.isInteger(descanso) && descanso > 0 ? descanso : 5;
-
+  focoMinutos = enteroPositivo(inputFocoMinutos.value, 20);
+  descansoMinutos = enteroPositivo(inputDescansoMinutos.value, 5);
   inputFocoMinutos.value = focoMinutos;
   inputDescansoMinutos.value = descansoMinutos;
-
   localStorage.setItem('focoMinutos', focoMinutos);
   localStorage.setItem('descansoMinutos', descansoMinutos);
 
@@ -72,13 +101,11 @@ function guardarConfiguracion() {
   const esPresetValido = Array.from(presetButtons).some(
     (button) => `${button.dataset.foco}-${button.dataset.descanso}` === presetKey
   );
-
   if (esPresetValido) {
     localStorage.setItem('presetSeleccionado', presetKey);
   } else {
     localStorage.removeItem('presetSeleccionado');
   }
-
   actualizarPresetActivo();
 }
 
@@ -103,12 +130,10 @@ function reproducirSonido(tipo) {
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
-
     const duracion = 0.2;
     const frecuencia = tipo === 'foco' ? 880 : 660;
     const ganancia = audioContext.createGain();
     const oscilador = audioContext.createOscillator();
-
     oscilador.type = 'sine';
     oscilador.frequency.value = frecuencia;
     oscilador.connect(ganancia);
@@ -116,7 +141,6 @@ function reproducirSonido(tipo) {
     ganancia.gain.setValueAtTime(0.001, audioContext.currentTime);
     ganancia.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
     ganancia.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duracion);
-
     oscilador.start(audioContext.currentTime);
     oscilador.stop(audioContext.currentTime + duracion);
   } catch (error) {
@@ -125,40 +149,30 @@ function reproducirSonido(tipo) {
 }
 
 function solicitarPermisoNotificacion() {
-  if (!('Notification' in window) || Notification.permission !== 'default') {
-    return;
-  }
-
-  Notification.requestPermission().then((perm) => {
-    if (perm === 'granted') {
-      // Notificaciones habilitadas
-    }
-  });
+  if (!('Notification' in window) || Notification.permission !== 'default') return;
+  Notification.requestPermission();
 }
 
 function mostrarNotificacion(tipo) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    return;
-  }
-
-  const titulo = tipo === 'foco' ? 'Foco completado' : 'Descanso terminado';
-  const cuerpo = tipo === 'foco'
-    ? 'Termina el ciclo y disfruta un pequeño descanso.'
-    : 'Tu descanso ha terminado. Vuelve a concentrarte.';
-
-  const notificacion = new Notification(titulo, {
-    body: cuerpo,
-    icon: 'assets/images/FocoUnico.png',
-  });
-
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const esFoco = tipo === 'foco';
+  const notificacion = new Notification(
+    esFoco ? 'Foco completado' : 'Descanso terminado',
+    {
+      body: esFoco
+        ? 'Termina el ciclo y disfruta un pequeño descanso.'
+        : 'Tu descanso ha terminado. Vuelve a concentrarte.',
+      icon: 'assets/images/FocoUnico.png',
+    }
+  );
   setTimeout(() => notificacion.close(), 5000);
 }
 
 function vibrar() {
-  if (navigator.vibrate) {
-    navigator.vibrate([120, 60, 120]);
-  }
+  if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
 }
+
+/* ===================== TEMA ===================== */
 
 function establecerTema(oscuro) {
   temaOscuro = oscuro;
@@ -166,7 +180,6 @@ function establecerTema(oscuro) {
   botonTema.textContent = oscuro ? 'Tema claro' : 'Tema oscuro';
   localStorage.setItem('temaOscuro', oscuro ? '1' : '0');
 
-  // Actualizar meta theme-color para móviles y barra de título
   let metaTheme = document.querySelector('meta[name="theme-color"]');
   if (!metaTheme) {
     metaTheme = document.createElement('meta');
@@ -175,58 +188,45 @@ function establecerTema(oscuro) {
   }
   metaTheme.setAttribute('content', oscuro ? '#081011' : '#5f6f83');
 
-  // Suavizar la transición de colores
-  try {
-    document.body.style.transition = 'background 0.25s ease, color 0.25s ease';
-  } catch (e) {
-    // noop
-  }
-  // Actualizar estado ARIA del botón de tema
-  try { botonTema.setAttribute('aria-pressed', oscuro ? 'true' : 'false'); } catch (e) {}
+  document.body.style.transition = 'background 0.25s ease, color 0.25s ease';
+  botonTema.setAttribute('aria-pressed', oscuro ? 'true' : 'false');
 }
+
+function cargarTema() {
+  establecerTema(localStorage.getItem('temaOscuro') === '1');
+}
+
+/* ===================== MODO ESTRICTO ===================== */
 
 function establecerModoEstricto(valor) {
   modoEstricto = Boolean(valor);
-  try { botonEstricto.setAttribute('aria-pressed', modoEstricto ? 'true' : 'false'); } catch (e) {}
-  botonEstricto.textContent = modoEstricto ? 'Estricto: ON' : 'Modo estricto';
+  botonEstricto.setAttribute('aria-pressed', modoEstricto ? 'true' : 'false');
+  botonEstricto.textContent = modoEstricto ? 'Estricto: ON' : 'Estricto: OFF';
+  botonEstricto.classList.toggle('estricto-on', modoEstricto);
   localStorage.setItem('modoEstricto', modoEstricto ? '1' : '0');
 }
 
 function aplicarModoEstricto(activar) {
-  // Cuando está activa una sesión de foco y modoEstricto es true, bloqueamos navegación y edición
   const disabled = Boolean(activar && modoEstricto);
-  try {
-    inputTarea.disabled = disabled;
-    inputSubpaso.disabled = disabled;
-    inputFocoMinutos.disabled = disabled;
-    inputDescansoMinutos.disabled = disabled;
-    presetButtons.forEach(b => b.disabled = disabled);
-    if (selectPlantillas) selectPlantillas.disabled = disabled;
-    if (botonGuardarPlantilla) botonGuardarPlantilla.disabled = disabled;
-    if (botonEliminarPlantilla) botonEliminarPlantilla.disabled = disabled;
-    botonHistorial.disabled = disabled;
-    botonVolver.disabled = disabled;
-    // Permitimos pausar incluso en modo estricto
-    botonPausa.disabled = false;
-  } catch (e) {}
-}
-
-function cargarTema() {
-  const valorTema = localStorage.getItem('temaOscuro');
-  establecerTema(valorTema === '1');
+  [inputTarea, inputSubpaso, inputFocoMinutos, inputDescansoMinutos].forEach(el => el.disabled = disabled);
+  presetButtons.forEach(b => b.disabled = disabled);
+  [selectPlantillas, botonGuardarPlantilla, botonEliminarPlantilla, botonHistorial, botonVolver].forEach(el => {
+    if (el) el.disabled = disabled;
+  });
+  botonPausa.disabled = false;
 }
 
 function cargarModoEstricto() {
-  const valorEstricto = localStorage.getItem('modoEstricto');
-  establecerModoEstricto(valorEstricto === '1');
+  establecerModoEstricto(localStorage.getItem('modoEstricto') === '1');
 }
+
+/* ===================== HISTORIAL Y ESTADÍSTICAS ===================== */
 
 function dibujarEstadisticas() {
   const total = historial.length;
   const completadas = historial.filter((item) => item.completado).length;
   const minutosFoco = historial.reduce((sum, item) => sum + Number(item.foco), 0);
   const minutosDescanso = historial.reduce((sum, item) => sum + Number(item.descanso), 0);
-
   estadisticasHistorial.innerHTML = `
     <span><strong>Sesiones</strong><strong>${total}</strong></span>
     <span><strong>Completadas</strong><strong>${completadas}</strong></span>
@@ -235,25 +235,100 @@ function dibujarEstadisticas() {
   `;
 }
 
+function obtenerHistorial() {
+  historial = leerJSON('historialSesiones');
+}
+
+function guardarHistorial() {
+  escribirJSON('historialSesiones', historial);
+}
+
+function agregarHistorial(tarea, subpaso, foco, descanso, completado) {
+  historial.unshift({
+    fecha: new Date().toISOString(),
+    tarea, subpaso, foco, descanso, completado,
+  });
+  if (historial.length > 10) historial.pop();
+  guardarHistorial();
+}
+
+/* ===================== SESIONES PENDIENTES ===================== */
+
+let togglePendientesAbierto = false;
+
+function toggleListaPendientes() {
+  const contenedor = document.getElementById('lista-pendientes-contenedor');
+  if (!contenedor) return;
+  togglePendientesAbierto = !togglePendientesAbierto;
+  contenedor.classList.toggle('oculto', !togglePendientesAbierto);
+  if (togglePendientesAbierto) dibujarListaPendientes();
+}
+
+function dibujarListaPendientes() {
+  const contenedor = document.getElementById('lista-pendientes-contenedor');
+  if (!contenedor) return;
+  const pendientes = obtenerSesionesPendientes().filter(p => !p.completada);
+  if (!pendientes.length) {
+    contenedor.innerHTML = '<p class="pendientes-vacio">No hay tareas pendientes.</p>';
+    return;
+  }
+  contenedor.innerHTML = '<div class="pendientes-lista">' +
+    pendientes.map(p => {
+      const tieneTiempo = p.tiempoRestante != null && p.tiempoRestante > 0;
+      return `
+      <button type="button" class="pendientes-item${tieneTiempo ? ' tiene-tiempo' : ''}" data-id="${p.id}">
+        <strong>${typeof p.tarea === 'string' ? p.tarea : ''}</strong>
+        <span>${typeof p.subpaso === 'string' ? p.subpaso : ''}${tieneTiempo ? ' · ⏱ ' + formatearTiempo(p.tiempoRestante) : ''}</span>
+      </button>`;
+    }).join('') + '</div>';
+  contenedor.querySelectorAll('.pendientes-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.id);
+      const pendientes = obtenerSesionesPendientes();
+      const sesion = pendientes.find(p => p.id === id);
+      if (!sesion) return;
+
+      // Si tiene tiempo guardado, reanudar directamente (manteniéndola como pendiente para poder actualizarla al salir)
+      if (sesion.tiempoRestante != null && sesion.tiempoRestante > 0) {
+        tiempoRestante = sesion.tiempoRestante;
+        enDescanso = sesion.enDescanso || false;
+        textoGranTarea.textContent = sesion.tarea || '';
+        textoSubpaso.textContent = sesion.subpaso || '';
+        sesionEnCurso = { tarea: sesion.tarea, subpaso: sesion.subpaso };
+        // NO marcar como completada, para que se pueda actualizar al salir
+        mostrarPantallaFoco();
+        iniciarTemporizador();
+        return;
+      }
+
+      // Si no tiene tiempo, solo cargar en inputs
+      inputTarea.value = sesion.tarea || '';
+      inputSubpaso.value = sesion.subpaso || '';
+      sesionCargadaParaReanudar = null;
+      botonIniciar.textContent = 'Iniciar Foco';
+      ocultarError();
+      inputTarea.focus();
+    });
+  });
+}
+
 function obtenerSesionesPendientes() {
-  const raw = localStorage.getItem('sesionesPendientes');
-  let pendientes = [];
-  try { pendientes = raw ? JSON.parse(raw) : []; } catch (e) { pendientes = []; }
-  return pendientes;
+  return leerJSON('sesionesPendientes');
 }
 
 function guardarSesionesPendientes(pendientes) {
-  localStorage.setItem('sesionesPendientes', JSON.stringify(pendientes));
+  escribirJSON('sesionesPendientes', pendientes);
 }
 
-function agregarSesionPendiente(tarea, subpaso) {
+function agregarSesionPendiente(tarea, subpaso, tiempoRestanteSesion) {
   const pendientes = obtenerSesionesPendientes();
   pendientes.unshift({
     id: Date.now() + Math.random(),
-    tarea,
-    subpaso,
+    tarea, subpaso,
     fecha: new Date().toISOString(),
     completada: false,
+    tiempoRestante: tiempoRestanteSesion != null ? tiempoRestanteSesion : null,
+    enDescanso: null,
   });
   if (pendientes.length > 50) pendientes.pop();
   guardarSesionesPendientes(pendientes);
@@ -271,105 +346,73 @@ function marcarSesionCompletada(id) {
 function actualizarContadorPendientes() {
   const pendientes = obtenerSesionesPendientes();
   const sinCompletar = pendientes.filter(p => !p.completada).length;
-  // Buscar o crear indicador en la pantalla de volcado
   let indicador = document.getElementById('indicador-pendientes');
   if (!indicador) {
     const card = document.querySelector('#pantalla-volcado .card');
     if (!card) return;
+    // Crear contenedor del indicador + lista
+    const wrapper = document.createElement('div');
+    wrapper.className = 'pendientes-wrapper';
     indicador = document.createElement('div');
     indicador.id = 'indicador-pendientes';
     indicador.className = 'pendientes-indicator';
-    card.insertBefore(indicador, card.querySelector('#boton-historial'));
+    indicador.setAttribute('tabindex', '0');
+    indicador.setAttribute('role', 'button');
+    indicador.setAttribute('aria-expanded', 'false');
+    const listaCont = document.createElement('div');
+    listaCont.id = 'lista-pendientes-contenedor';
+    listaCont.className = 'pendientes-lista-contenedor oculto';
+    wrapper.appendChild(indicador);
+    wrapper.appendChild(listaCont);
+    card.insertBefore(wrapper, card.querySelector('#boton-historial'));
+    // Evento click en el indicador
+    indicador.addEventListener('click', toggleListaPendientes);
   }
   if (sinCompletar > 0) {
-    indicador.innerHTML = `📋 <strong>${sinCompletar}</strong> tarea${sinCompletar !== 1 ? 's' : ''} pendiente${sinCompletar !== 1 ? 's' : ''}`;
+    indicador.innerHTML = `📋 <strong>${sinCompletar}</strong> tarea${sinCompletar !== 1 ? 's' : ''} pendiente${sinCompletar !== 1 ? 's' : ''} <span class="pendientes-flecha">${togglePendientesAbierto ? '▲' : '▼'}</span>`;
     indicador.classList.remove('oculto');
+    indicador.setAttribute('aria-expanded', togglePendientesAbierto ? 'true' : 'false');
   } else {
     indicador.classList.add('oculto');
+    // Cerrar lista si está abierta
+    const contenedor = document.getElementById('lista-pendientes-contenedor');
+    if (contenedor && !contenedor.classList.contains('oculto')) {
+      togglePendientesAbierto = true;
+      toggleListaPendientes();
+    }
   }
 }
 
 function limpiarPendientesCompletadas() {
   const pendientes = obtenerSesionesPendientes();
-  const activas = pendientes.filter(p => !p.completada);
-  guardarSesionesPendientes(activas);
+  guardarSesionesPendientes(pendientes.filter(p => !p.completada));
   actualizarContadorPendientes();
 }
 
-function alternarPausa() {
-  if (!intervalo) {
-    return;
-  }
+/* ===================== PLANTILLAS ===================== */
 
-  estaPausado = !estaPausado;
-  if (estaPausado) {
-    clearInterval(intervalo);
-    botonPausa.textContent = 'Reanudar';
-    mensajeFoco.textContent = 'Temporizador pausado. Pulsa para continuar.';
-  } else {
-    botonPausa.textContent = 'Pausa';
-    mensajeFoco.textContent = enDescanso
-      ? 'Disfruta tu descanso hasta que termine el tiempo.'
-      : 'Mantente concentrado hasta que termine el tiempo.';
-    iniciarTemporizador();
-  }
+function obtenerPlantillas() {
+  return leerJSON('plantillasTareas');
 }
 
-function seleccionarPreset(foco, descanso) {
-  focoMinutos = foco;
-  descansoMinutos = descanso;
-  inputFocoMinutos.value = focoMinutos;
-  inputDescansoMinutos.value = descansoMinutos;
-  localStorage.setItem('focoMinutos', focoMinutos);
-  localStorage.setItem('descansoMinutos', descansoMinutos);
-  localStorage.setItem('presetSeleccionado', `${focoMinutos}-${descansoMinutos}`);
-  actualizarPresetActivo();
+function guardarPlantillas(plantillas) {
+  escribirJSON('plantillasTareas', plantillas);
 }
 
-function actualizarPresetActivo() {
-  presetButtons.forEach((button) => {
-    const focoPreset = parseInt(button.dataset.foco, 10);
-    const descansoPreset = parseInt(button.dataset.descanso, 10);
-    const esActivo = focoPreset === focoMinutos && descansoPreset === descansoMinutos;
-    button.classList.toggle('active', esActivo);
-  });
-}
-
-function obtenerHistorial() {
-  const contenido = localStorage.getItem('historialSesiones');
-  try {
-    historial = contenido ? JSON.parse(contenido) : [];
-  } catch (error) {
-    historial = [];
-  }
-}
-
-function guardarHistorial() {
-  localStorage.setItem('historialSesiones', JSON.stringify(historial));
-}
-
-// Plantillas (tareas frecuentes)
 function cargarPlantillas() {
-  const raw = localStorage.getItem('plantillasTareas');
-  let plantillas = [];
-  try { plantillas = raw ? JSON.parse(raw) : []; } catch (e) { plantillas = []; }
-  // limpiar select
-  if (selectPlantillas) {
-    selectPlantillas.innerHTML = '<option value="">— Seleccionar plantilla —</option>';
-    plantillas.forEach((p, i) => {
-      const opt = document.createElement('option');
-      opt.value = String(i);
-      opt.textContent = p.name;
-      selectPlantillas.appendChild(opt);
-    });
-    selectPlantillas.value = '';
-    if (botonEliminarPlantilla) {
-      botonEliminarPlantilla.disabled = plantillas.length === 0;
-    }
-  }
+  const plantillas = obtenerPlantillas();
+  selectPlantillas.innerHTML = '<option value="">— Seleccionar plantilla —</option>';
+  plantillas.forEach((p, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = p.name;
+    selectPlantillas.appendChild(opt);
+  });
+  selectPlantillas.value = '';
+  if (botonEliminarPlantilla) botonEliminarPlantilla.disabled = plantillas.length === 0;
 }
 
-function guardarPlantilla() {
+function guardarPlantillaHandler() {
   const tareaValor = inputTarea.value.trim();
   const subpasoValor = inputSubpaso.value.trim();
   if (!tareaValor && !subpasoValor) {
@@ -378,52 +421,30 @@ function guardarPlantilla() {
   }
   const nombre = prompt('Nombre para la plantilla:', tareaValor || subpasoValor);
   if (!nombre) return;
-  const raw = localStorage.getItem('plantillasTareas');
-  let plantillas = [];
-  try { plantillas = raw ? JSON.parse(raw) : []; } catch (e) { plantillas = []; }
+  const plantillas = obtenerPlantillas();
   plantillas.push({ name: nombre, tarea: tareaValor, subpaso: subpasoValor });
-  localStorage.setItem('plantillasTareas', JSON.stringify(plantillas));
+  guardarPlantillas(plantillas);
   cargarPlantillas();
 }
 
-function eliminarPlantilla() {
-  if (!selectPlantillas) return;
+function eliminarPlantillaHandler() {
   const idx = selectPlantillas.value;
   if (!idx) { mostrarError('Selecciona primero una plantilla para eliminar.'); return; }
-  const raw = localStorage.getItem('plantillasTareas');
-  let plantillas = [];
-  try { plantillas = raw ? JSON.parse(raw) : []; } catch (e) { plantillas = []; }
+  const plantillas = obtenerPlantillas();
   plantillas.splice(Number(idx), 1);
-  localStorage.setItem('plantillasTareas', JSON.stringify(plantillas));
+  guardarPlantillas(plantillas);
   cargarPlantillas();
 }
 
 function aplicarPlantillaPorIndice(idx) {
-  const raw = localStorage.getItem('plantillasTareas');
-  let plantillas = [];
-  try { plantillas = raw ? JSON.parse(raw) : []; } catch (e) { plantillas = []; }
+  const plantillas = obtenerPlantillas();
   const p = plantillas[Number(idx)];
   if (!p) return;
   inputTarea.value = p.tarea || '';
   inputSubpaso.value = p.subpaso || '';
 }
 
-function agregarHistorial(tarea, subpaso, foco, descanso, completado) {
-  const registro = {
-    fecha: new Date().toISOString(),
-    tarea,
-    subpaso,
-    foco,
-    descanso,
-    completado,
-  };
-
-  historial.unshift(registro);
-  if (historial.length > 10) {
-    historial.pop();
-  }
-  guardarHistorial();
-}
+/* ===================== PANTALLAS (NAVEGACIÓN) ===================== */
 
 function setAriaAndInert(elemento, hidden) {
   elemento.setAttribute('aria-hidden', hidden ? 'true' : 'false');
@@ -460,6 +481,21 @@ function mostrarPantallaHistorial() {
 }
 
 function mostrarPantallaVolcado() {
+  // Guardar tiempo restante en la sesión pendiente si se interrumpe
+  if (sesionEnCurso && intervalo) {
+    const pendientes = obtenerSesionesPendientes();
+    const pendiente = pendientes.find(p =>
+      !p.completada &&
+      (sesionEnCurso.id ? p.id === sesionEnCurso.id : (p.tarea === sesionEnCurso.tarea && p.subpaso === sesionEnCurso.subpaso))
+    );
+    if (pendiente && tiempoRestante > 0) {
+      pendiente.tiempoRestante = tiempoRestante;
+      pendiente.enDescanso = enDescanso;
+      guardarSesionesPendientes(pendientes);
+      actualizarContadorPendientes();
+    }
+  }
+
   mostrarPantallaSegura(pantallaVolcado, inputTarea);
   botonSiguiente.classList.add('oculto');
   botonPausa.classList.add('oculto');
@@ -477,18 +513,17 @@ function mostrarPantallaVolcado() {
 function mostrarPantallaFoco() {
   mostrarPantallaSegura(pantallaFoco, botonPausa);
   botonPausa.classList.remove('oculto');
+  if (botonInterrumpir) botonInterrumpir.classList.remove('oculto');
   botonPausa.textContent = estaPausado ? 'Reanudar' : 'Pausa';
   actualizarProgreso();
 }
 
 function dibujarHistorial() {
   listaHistorial.innerHTML = '';
-
   if (!historial.length) {
     listaHistorial.innerHTML = '<p class="texto-intro">Aún no hay sesiones registradas.</p>';
     return;
   }
-
   historial.forEach((registro) => {
     const item = document.createElement('div');
     item.className = 'historial-item';
@@ -506,14 +541,47 @@ function dibujarHistorial() {
   });
 }
 
+/* ===================== TEMPORIZADOR ===================== */
+
+function alternarPausa() {
+  if (!intervalo) return;
+  estaPausado = !estaPausado;
+  if (estaPausado) {
+    clearInterval(intervalo);
+    botonPausa.textContent = 'Reanudar';
+    mensajeFoco.textContent = 'Temporizador pausado. Pulsa para continuar.';
+  } else {
+    botonPausa.textContent = 'Pausa';
+    mensajeFoco.textContent = enDescanso
+      ? 'Disfruta tu descanso hasta que termine el tiempo.'
+      : 'Mantente concentrado hasta que termine el tiempo.';
+    iniciarTemporizador();
+  }
+}
+
+function seleccionarPreset(foco, descanso) {
+  focoMinutos = foco;
+  descansoMinutos = descanso;
+  inputFocoMinutos.value = focoMinutos;
+  inputDescansoMinutos.value = descansoMinutos;
+  guardarConfiguracion();
+  actualizarPresetActivo();
+}
+
+function actualizarPresetActivo() {
+  presetButtons.forEach((button) => {
+    const focoPreset = parseInt(button.dataset.foco, 10);
+    const descansoPreset = parseInt(button.dataset.descanso, 10);
+    button.classList.toggle('active', focoPreset === focoMinutos && descansoPreset === descansoMinutos);
+  });
+}
+
 function iniciarTemporizador() {
   clearInterval(intervalo);
   estaPausado = false;
   botonPausa.textContent = 'Pausa';
   contenedorTiempo.textContent = formatearTiempo(tiempoRestante);
   actualizarProgreso();
-
-  // Si el modo estricto está activado, aplicarlo durante la sesión
   aplicarModoEstricto(true);
 
   intervalo = setInterval(() => {
@@ -524,18 +592,13 @@ function iniciarTemporizador() {
     if (tiempoRestante <= 0) {
       clearInterval(intervalo);
       if (!enDescanso) {
-        reproducirSonido('foco');
-        vibrar();
-        mostrarNotificacion('foco');
+        alertarFinDeCiclo('foco');
         comenzarDescanso();
       } else {
-        reproducirSonido('descanso');
-        vibrar();
-        mostrarNotificacion('descanso');
+        alertarFinDeCiclo('descanso');
         finalizarDescanso();
         registrarSesion(true);
-          // al finalizar el descanso, retiramos el modo estricto temporal
-          aplicarModoEstricto(false);
+        aplicarModoEstricto(false);
       }
     }
   }, 1000);
@@ -557,10 +620,27 @@ function finalizarDescanso() {
 }
 
 function registrarSesion(completado) {
-  const tareaValor = textoGranTarea.textContent;
-  const subpasoValor = textoSubpaso.textContent;
-  agregarHistorial(tareaValor, subpasoValor, focoMinutos, descansoMinutos, completado);
+  agregarHistorial(
+    textoGranTarea.textContent,
+    textoSubpaso.textContent,
+    focoMinutos,
+    descansoMinutos,
+    completado
+  );
 }
+
+/* ===================== BORRAR HISTORIAL ===================== */
+
+function borrarHistorialHandler() {
+  if (historial.length === 0) return;
+  if (!confirm('¿Estás seguro de que quieres borrar todo el historial de sesiones?')) return;
+  historial = [];
+  guardarHistorial();
+  dibujarEstadisticas();
+  dibujarHistorial();
+}
+
+/* ===================== EVENTOS ===================== */
 
 botonIniciar.addEventListener('click', () => {
   const tareaValor = inputTarea.value.trim();
@@ -573,92 +653,195 @@ botonIniciar.addEventListener('click', () => {
     return;
   }
 
+  // Si hay una sesión cargada para reanudar, reanudarla directamente
+  if (sesionCargadaParaReanudar) {
+    tiempoRestante = sesionCargadaParaReanudar.tiempoRestante;
+    enDescanso = sesionCargadaParaReanudar.enDescanso;
+    textoGranTarea.textContent = sesionCargadaParaReanudar.tarea;
+    textoSubpaso.textContent = sesionCargadaParaReanudar.subpaso;
+    sesionEnCurso = {
+      tarea: sesionCargadaParaReanudar.tarea,
+      subpaso: sesionCargadaParaReanudar.subpaso
+    };
+    // Marcar la sesión anterior como completada (se reanuda)
+    marcarSesionCompletada(sesionCargadaParaReanudar.id);
+    sesionCargadaParaReanudar = null;
+    botonIniciar.textContent = 'Iniciar Foco';
+    mostrarPantallaFoco();
+    iniciarTemporizador();
+    return;
+  }
+
   solicitarPermisoNotificacion();
   guardarConfiguracion();
   tiempoRestante = focoMinutos * 60;
   textoGranTarea.textContent = tareaValor;
   textoSubpaso.textContent = subpasoValor;
 
-  // Guardar sesión como pendiente
-  sesionEnCurso = {
-    tarea: tareaValor,
-    subpaso: subpasoValor
-  };
-  agregarSesionPendiente(tareaValor, subpasoValor);
+  sesionEnCurso = { tarea: tareaValor, subpaso: subpasoValor };
+  agregarSesionPendiente(tareaValor, subpasoValor, null);
 
   mostrarPantallaFoco();
   iniciarTemporizador();
 });
 
 botonSiguiente.addEventListener('click', () => {
-  // Marcar la sesión actual como completada en pendientes
   if (sesionEnCurso) {
     const pendientes = obtenerSesionesPendientes();
-    // Buscar la última sesión con la misma tarea/subpaso no completada
     const sesionPendiente = pendientes.find(p =>
       !p.completada &&
       p.tarea === sesionEnCurso.tarea &&
       p.subpaso === sesionEnCurso.subpaso
     );
-    if (sesionPendiente) {
-      marcarSesionCompletada(sesionPendiente.id);
-    }
+    if (sesionPendiente) marcarSesionCompletada(sesionPendiente.id);
     sesionEnCurso = null;
   }
   mostrarPantallaVolcado();
 });
+
 botonHistorial.addEventListener('click', mostrarPantallaHistorial);
-botonTema.addEventListener('click', () => {
-  establecerTema(!temaOscuro);
-});
+botonTema.addEventListener('click', () => establecerTema(!temaOscuro));
 if (botonEstricto) botonEstricto.addEventListener('click', () => establecerModoEstricto(!modoEstricto));
+botonInterrumpir.addEventListener('click', () => {
+  // Guardar tiempo restante en sesión pendiente
+  if (sesionEnCurso && tiempoRestante > 0) {
+    const pendientes = obtenerSesionesPendientes();
+    const pendiente = pendientes.find(p =>
+      !p.completada &&
+      p.tarea === sesionEnCurso.tarea &&
+      p.subpaso === sesionEnCurso.subpaso
+    );
+    if (pendiente) {
+      pendiente.tiempoRestante = tiempoRestante;
+      pendiente.enDescanso = enDescanso;
+      guardarSesionesPendientes(pendientes);
+    }
+  }
+  sesionEnCurso = null;
+  mostrarPantallaVolcado();
+});
+
 botonPausa.addEventListener('click', alternarPausa);
+
 presetButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    const foco = parseInt(button.dataset.foco, 10);
-    const descanso = parseInt(button.dataset.descanso, 10);
-    seleccionarPreset(foco, descanso);
+    seleccionarPreset(parseInt(button.dataset.foco, 10), parseInt(button.dataset.descanso, 10));
   });
 });
 
-if (botonGuardarPlantilla) botonGuardarPlantilla.addEventListener('click', guardarPlantilla);
-if (botonEliminarPlantilla) botonEliminarPlantilla.addEventListener('click', eliminarPlantilla);
+if (botonGuardarPlantilla) botonGuardarPlantilla.addEventListener('click', guardarPlantillaHandler);
+if (botonEliminarPlantilla) botonEliminarPlantilla.addEventListener('click', eliminarPlantillaHandler);
 if (selectPlantillas) selectPlantillas.addEventListener('change', (e) => {
-  if (!e.target.value) return;
-  aplicarPlantillaPorIndice(e.target.value);
+  if (e.target.value) aplicarPlantillaPorIndice(e.target.value);
 });
 
-// Ocultar el mensaje de error cuando el usuario escribe
 [inputTarea, inputSubpaso, inputFocoMinutos, inputDescansoMinutos].forEach((el) => {
-  if (el) el.addEventListener('input', ocultarError);
+  if (el) el.addEventListener('input', () => {
+    ocultarError();
+    // Si el usuario cambia los inputs manualmente, resetear el botón
+    sesionCargadaParaReanudar = null;
+    botonIniciar.textContent = 'Iniciar Foco';
+  });
 });
 
 document.addEventListener('keydown', (event) => {
   if (event.code === 'Enter' && !pantallaVolcado.classList.contains('oculto')) {
     botonIniciar.click();
   }
-
   if (event.code === 'Space' && !pantallaFoco.classList.contains('oculto')) {
     event.preventDefault();
     alternarPausa();
   }
 });
 
-// Inicialización
-obtenerConfiguracion();
-obtenerHistorial();
-cargarPlantillas();
-cargarTema();
-cargarModoEstricto();
-dibujarEstadisticas();
-actualizarContadorPendientes();
+/* ===================== INICIALIZACIÓN ===================== */
 
-// Sincronizar ARIA al iniciar
-try {
+function iniciarApp() {
+  obtenerConfiguracion();
+  obtenerHistorial();
+  cargarPlantillas();
+  cargarTema();
+  cargarModoEstricto();
+  dibujarEstadisticas();
+  actualizarContadorPendientes();
+
   botonTema.setAttribute('aria-pressed', temaOscuro ? 'true' : 'false');
-  pantallaVolcado.setAttribute('aria-hidden', pantallaVolcado.classList.contains('oculto') ? 'true' : 'false');
-  pantallaFoco.setAttribute('aria-hidden', pantallaFoco.classList.contains('oculto') ? 'true' : 'false');
-  pantallaHistorial.setAttribute('aria-hidden', pantallaHistorial.classList.contains('oculto') ? 'true' : 'false');
-} catch (e) {}
+  [pantallaVolcado, pantallaFoco, pantallaHistorial].forEach(p => {
+    p.setAttribute('aria-hidden', p.classList.contains('oculto') ? 'true' : 'false');
+  });
 
-botonVolver.addEventListener('click', mostrarPantallaVolcado);
+  const botonBorrarHistorial = document.getElementById('boton-borrar-historial');
+  if (botonBorrarHistorial) botonBorrarHistorial.addEventListener('click', borrarHistorialHandler);
+
+  botonVolver.addEventListener('click', mostrarPantallaVolcado);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', iniciarApp);
+} else {
+  iniciarApp();
+}
+
+export {
+  formatearTiempo,
+  enteroPositivo,
+  leerJSON,
+  escribirJSON,
+  alertarFinDeCiclo,
+  obtenerConfiguracion,
+  guardarConfiguracion,
+  mostrarError,
+  ocultarError,
+  actualizarProgreso,
+  reproducirSonido,
+  mostrarNotificacion,
+  vibrar,
+  iniciarTemporizador,
+  pausarTemporizador,
+  reanudarTemporizador,
+  detenerTemporizador,
+  alternarPausa,
+  mostrarPantallaVolcado,
+  mostrarPantallaFoco,
+  mostrarPantallaHistorial,
+  establecerTema,
+  cargarTema,
+  obtenerHistorial,
+  guardarHistorial,
+  dibujarEstadisticas,
+  borrarHistorialHandler,
+  obtenerSesionesPendientes,
+  guardarSesionesPendientes,
+  agregarSesionPendiente,
+  marcarSesionCompletada,
+  actualizarContadorPendientes,
+  guardarPlantillaHandler,
+  eliminarPlantillaHandler,
+  cargarPlantillas,
+  aplicarPlantillaPorIndice,
+  seleccionarPreset,
+  actualizarPresetActivo,
+  establecerModoEstricto,
+  cargarModoEstricto,
+  iniciarSesionHandler,
+  botonIniciar,
+  botonSiguiente,
+  botonHistorial,
+  botonVolver,
+  botonTema,
+  botonEstricto,
+  inputTarea,
+  inputSubpaso,
+  inputFocoMinutos,
+  inputDescansoMinutos,
+  presetButtons,
+  mensajeError,
+  botonPausa,
+  botonInterrumpir,
+  barraAvance,
+  estadisticasHistorial,
+  textoGranTarea,
+  textoSubpaso,
+  contenedorTiempo,
+  mensajeFoco,
+};
