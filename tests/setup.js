@@ -36,6 +36,9 @@ global.AudioContext = class {
 
 global.navigator.vibrate = () => {};
 
+global.prompt = (message, defaultValue) => defaultValue || 'Temporal';
+global.confirm = () => true;
+
 // Inyectar el markup mínimo para que document.getElementById funcione
 // al cargar app.js (en el módulo, el DOMContentLoaded se dispara con readyState=complete)
 document.body.innerHTML = `

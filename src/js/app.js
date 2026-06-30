@@ -345,6 +345,8 @@ function marcarSesionCompletada(id) {
 
 function actualizarContadorPendientes() {
   const pendientes = obtenerSesionesPendientes();
+  // Limpiar completadas antes de calcular el contador
+  limpiarPendientesCompletadas(false);
   const sinCompletar = pendientes.filter(p => !p.completada).length;
   let indicador = document.getElementById('indicador-pendientes');
   if (!indicador) {
@@ -383,10 +385,11 @@ function actualizarContadorPendientes() {
   }
 }
 
-function limpiarPendientesCompletadas() {
+function limpiarPendientesCompletadas(actualizar = true) {
   const pendientes = obtenerSesionesPendientes();
-  guardarSesionesPendientes(pendientes.filter(p => !p.completada));
-  actualizarContadorPendientes();
+  const filtradas = pendientes.filter(p => !p.completada);
+  guardarSesionesPendientes(filtradas);
+  if (actualizar) actualizarContadorPendientes();
 }
 
 /* ===================== PLANTILLAS ===================== */
@@ -419,8 +422,7 @@ function guardarPlantillaHandler() {
     mostrarError('Rellena la tarea o sub-paso antes de guardar una plantilla.');
     return;
   }
-  const nombre = prompt('Nombre para la plantilla:', tareaValor || subpasoValor);
-  if (!nombre) return;
+  const nombre = (tareaValor || subpasoValor).slice(0, 40);
   const plantillas = obtenerPlantillas();
   plantillas.push({ name: nombre, tarea: tareaValor, subpaso: subpasoValor });
   guardarPlantillas(plantillas);
